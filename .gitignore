@@ -1,0 +1,20 @@
+# Gitignore for devops project
+
+# Node.js
+node_modules
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# Compiled output
+build/
+dist/
+out/
+
+# AWS Credentials
+AWS/KEYS
+
+# macOS
+.DS_Store

@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar todas las dependencias (incluyendo dev)
+RUN npm install
+
+# Copiar código fuente
+COPY src ./src
+COPY tsconfig.json ./
+
+EXPOSE 3001
+
+# Ejecutar en modo desarrollo
+CMD ["npm", "run", "dev"]

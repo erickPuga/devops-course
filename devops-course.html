@@ -1,0 +1,2547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps MVP — Curso Intensivo + How-To Guides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #00ff88;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --accent4: #06b6d4;
+    --danger: #ef4444;
+    --text: #e8e8f0;
+    --muted: #6b7280;
+    --w1: #00ff88;
+    --w2: #7c3aed;
+    --w3: #06b6d4;
+    --w4: #f59e0b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.4; }
+
+  /* HEADER */
+  header { position: relative; padding: 80px 40px 60px; border-bottom: 1px solid var(--border); overflow: hidden; }
+  .header-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.3; mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 70%); }
+  .header-glow { position: absolute; top: -100px; left: 50%; transform: translateX(-50%); width: 600px; height: 300px; background: radial-gradient(ellipse, rgba(0,255,136,0.12) 0%, transparent 70%); pointer-events: none; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.3); color: var(--accent); font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 14px; border-radius: 4px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+  .badge::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+  h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(36px, 6vw, 72px); line-height: 1.0; letter-spacing: -2px; position: relative; z-index: 1; }
+  h1 span.green { color: var(--accent); }
+  h1 span.purple { color: #a78bfa; }
+  .subtitle { margin-top: 20px; font-size: 16px; color: var(--muted); max-width: 600px; line-height: 1.7; font-weight: 400; position: relative; z-index: 1; }
+  .stats-row { display: flex; gap: 32px; margin-top: 40px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+  .stat-val { font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* TABS */
+  .tab-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+  .tab-btn { background: none; border: none; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 12px; padding: 16px 24px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .tab-btn.active { color: var(--text); border-bottom-color: currentColor; }
+  .tab-btn[data-week="1"].active { color: var(--w1); border-bottom-color: var(--w1); }
+  .tab-btn[data-week="2"].active { color: var(--w2); border-bottom-color: var(--w2); }
+  .tab-btn[data-week="3"].active { color: var(--w3); border-bottom-color: var(--w3); }
+  .tab-btn[data-week="4"].active { color: var(--w4); border-bottom-color: var(--w4); }
+  .tab-btn[data-week="0"].active { color: var(--accent4); border-bottom-color: var(--accent4); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* MAIN */
+  main { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; position: relative; z-index: 1; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* WEEK HERO */
+  .week-hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; margin-bottom: 48px; padding: 32px; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .week-hero::before { content: ''; position: absolute; inset: 0; opacity: 0.06; }
+  .week-hero[data-week="1"]::before { background: linear-gradient(135deg, var(--w1), transparent 60%); }
+  .week-hero[data-week="2"]::before { background: linear-gradient(135deg, var(--w2), transparent 60%); }
+  .week-hero[data-week="3"]::before { background: linear-gradient(135deg, var(--w3), transparent 60%); }
+  .week-hero[data-week="4"]::before { background: linear-gradient(135deg, var(--w4), transparent 60%); }
+  .week-number { font-family: 'Space Mono', monospace; font-size: 80px; font-weight: 700; line-height: 1; opacity: 0.12; position: absolute; right: 24px; top: 16px; }
+  .week-tag { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; display: inline-block; margin-bottom: 12px; }
+  [data-week="1"] .week-tag { background: rgba(0,255,136,0.12); color: var(--w1); }
+  [data-week="2"] .week-tag { background: rgba(124,58,237,0.12); color: var(--w2); }
+  [data-week="3"] .week-tag { background: rgba(6,182,212,0.12); color: var(--w3); }
+  [data-week="4"] .week-tag { background: rgba(245,158,11,0.12); color: var(--w4); }
+  .week-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 12px; }
+  .week-desc { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 560px; font-weight: 400; }
+  .tools-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .tool-chip { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 4px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+
+  /* SECTIONS */
+  .section { margin-bottom: 40px; }
+  .section-title { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* TOPIC CARDS */
+  .topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; transition: border-color 0.2s, transform 0.2s; }
+  .topic-card:hover { transform: translateY(-2px); }
+  [data-week="1"] .topic-card:hover { border-color: rgba(0,255,136,0.4); }
+  [data-week="2"] .topic-card:hover { border-color: rgba(124,58,237,0.4); }
+  [data-week="3"] .topic-card:hover { border-color: rgba(6,182,212,0.4); }
+  [data-week="4"] .topic-card:hover { border-color: rgba(245,158,11,0.4); }
+  .topic-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+  .topic-name { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .topic-items { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .topic-items li { font-size: 13px; color: var(--muted); padding-left: 14px; position: relative; line-height: 1.5; font-weight: 400; }
+  .topic-items li::before { content: '→'; position: absolute; left: 0; font-size: 10px; top: 1px; color: var(--border); font-family: 'Space Mono', monospace; }
+
+  /* CLI BLOCKS */
+  .cli-block { background: #0d0d14; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .cli-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .cli-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cli-dot.r { background: #ef4444; } .cli-dot.y { background: #f59e0b; } .cli-dot.g { background: #22c55e; }
+  .cli-title { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-left: 4px; letter-spacing: 1px; }
+  .cli-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .cmd-group { border-left: 2px solid var(--border); padding-left: 14px; }
+  .cmd-comment { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4ade80; opacity: 0.6; margin-bottom: 4px; }
+  .cmd-line { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #c4b5fd; line-height: 1.6; display: block; }
+  .cmd-line .prompt { color: #6b7280; } .cmd-line .cmd { color: #60a5fa; } .cmd-line .flag { color: #a78bfa; } .cmd-line .arg { color: #fbbf24; } .cmd-line .str { color: #34d399; }
+
+  /* HOW-TO ACCORDION */
+  .howto-section { margin-bottom: 48px; }
+  .howto-grid { display: flex; flex-direction: column; gap: 12px; }
+
+  .howto-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  [data-week="1"] .howto-card:hover { border-color: rgba(0,255,136,0.3); }
+  [data-week="2"] .howto-card:hover { border-color: rgba(124,58,237,0.3); }
+  [data-week="3"] .howto-card:hover { border-color: rgba(6,182,212,0.3); }
+  [data-week="4"] .howto-card:hover { border-color: rgba(245,158,11,0.3); }
+
+  .howto-trigger {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .howto-trigger:hover { background: rgba(255,255,255,0.02); }
+
+  .howto-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  [data-week="1"] .howto-num { background: rgba(0,255,136,0.1); color: var(--w1); }
+  [data-week="2"] .howto-num { background: rgba(124,58,237,0.12); color: var(--w2); }
+  [data-week="3"] .howto-num { background: rgba(6,182,212,0.1); color: var(--w3); }
+  [data-week="4"] .howto-num { background: rgba(245,158,11,0.1); color: var(--w4); }
+
+  .howto-trigger-title { font-size: 15px; font-weight: 700; flex: 1; }
+  .howto-trigger-sub { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: auto; padding-right: 12px; white-space: nowrap; }
+
+  .howto-arrow {
+    color: var(--muted);
+    font-size: 14px;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .howto-card.open .howto-arrow { transform: rotate(90deg); }
+
+  .howto-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 24px;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .howto-card.open .howto-body { display: flex; }
+
+  /* HOWTO BODY ELEMENTS */
+  .howto-intro {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-weight: 400;
+    border-left: 3px solid var(--border);
+    padding-left: 16px;
+  }
+
+  .howto-steps { display: flex; flex-direction: column; gap: 16px; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  [data-week="1"] .step-num { background: rgba(0,255,136,0.1); color: var(--w1); }
+  [data-week="2"] .step-num { background: rgba(124,58,237,0.12); color: var(--w2); }
+  [data-week="3"] .step-num { background: rgba(6,182,212,0.1); color: var(--w3); }
+  [data-week="4"] .step-num { background: rgba(245,158,11,0.1); color: var(--w4); }
+
+  .step-content {}
+  .step-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .step-desc { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 400; }
+
+  .step-code {
+    margin-top: 10px;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #c4b5fd;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .step-code .sc { color: #34d399; }
+  .step-code .sk { color: #60a5fa; }
+  .step-code .sf { color: #a78bfa; }
+  .step-code .sv { color: #fbbf24; }
+  .step-code .sm { color: #6b7280; }
+
+  .file-block {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .file-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .file-name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+  .file-lang { font-family: 'Space Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 3px; background: var(--border); color: var(--muted); margin-left: auto; }
+  .file-body { padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+  .file-body .sc { color: #34d399; } .file-body .sk { color: #60a5fa; } .file-body .sf { color: #a78bfa; }
+  .file-body .sv { color: #fbbf24; } .file-body .sm { color: #6b7280; } .file-body .ss { color: #f97316; }
+  .file-body .sx { color: #c4b5fd; }
+
+  .warn-box {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .warn-box strong { color: var(--accent3); }
+
+  .ok-box {
+    background: rgba(0,255,136,0.04);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .ok-box strong { color: var(--accent); }
+
+  /* CHALLENGE CARD */
+  .challenge-card { border-radius: 12px; padding: 32px; position: relative; overflow: hidden; border: 1px solid transparent; }
+  [data-week="1"] .challenge-card { background: linear-gradient(135deg, rgba(0,255,136,0.05), rgba(0,255,136,0.02)); border-color: rgba(0,255,136,0.2); }
+  [data-week="2"] .challenge-card { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.02)); border-color: rgba(124,58,237,0.25); }
+  [data-week="3"] .challenge-card { background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(6,182,212,0.02)); border-color: rgba(6,182,212,0.2); }
+  [data-week="4"] .challenge-card { background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02)); border-color: rgba(245,158,11,0.2); }
+  .challenge-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  [data-week="1"] .challenge-label { color: var(--w1); } [data-week="2"] .challenge-label { color: var(--w2); } [data-week="3"] .challenge-label { color: var(--w3); } [data-week="4"] .challenge-label { color: var(--w4); }
+  .challenge-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+  .challenge-desc { font-size: 14px; color: var(--muted); line-height: 1.8; font-weight: 400; margin-bottom: 20px; }
+  .deliverables { display: flex; flex-direction: column; gap: 8px; }
+  .deliverable { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--text); line-height: 1.5; }
+  .deliverable-check { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 10px; color: transparent; }
+  .deliverable-check.checked { border-color: currentColor; background: currentColor; color: black; }
+  [data-week="1"] .deliverable-check { color: var(--w1); } [data-week="2"] .deliverable-check { color: var(--w2); } [data-week="3"] .deliverable-check { color: var(--w3); } [data-week="4"] .deliverable-check { color: var(--w4); }
+
+  /* OVERVIEW */
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 48px; }
+  .week-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .week-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .week-card[data-goto="1"]::before { background: var(--w1); } .week-card[data-goto="2"]::before { background: var(--w2); } .week-card[data-goto="3"]::before { background: var(--w3); } .week-card[data-goto="4"]::before { background: var(--w4); }
+  .week-card:hover { transform: translateY(-3px); border-color: var(--muted); }
+  .week-card-num { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; }
+  .week-card[data-goto="1"] .week-card-num { color: var(--w1); } .week-card[data-goto="2"] .week-card-num { color: var(--w2); } .week-card[data-goto="3"] .week-card-num { color: var(--w3); } .week-card[data-goto="4"] .week-card-num { color: var(--w4); }
+  .week-card-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .week-card-desc { font-size: 12px; color: var(--muted); line-height: 1.6; font-weight: 400; }
+  .stack-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px; margin-bottom: 32px; }
+  .stack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 20px; }
+  .stack-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+  .stack-icon { font-size: 20px; }
+  .arch-diagram { background: #0d0d14; border: 1px solid var(--border); border-radius: 12px; padding: 32px; margin-bottom: 32px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6b7280; line-height: 1.8; overflow-x: auto; }
+  .flow-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .flow-node { background: var(--surface2); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+  .flow-arrow { color: var(--muted); font-size: 16px; }
+  .tip-box { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .tip-box .tip-icon { font-size: 20px; flex-shrink: 0; }
+  .tip-box .tip-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--accent4); }
+  .tip-box .tip-text { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 400; }
+
+  /* PROGRESS */
+  .progress-wrapper { position: fixed; bottom: 24px; right: 24px; z-index: 200; }
+  .progress-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Space Mono', monospace; font-size: 11px; padding: 10px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+  .progress-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .progress-bar-inner { height: 4px; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+  .progress-track { width: 80px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+
+  @media (max-width: 640px) {
+    header { padding: 48px 20px 40px; }
+    main { padding: 32px 16px 60px; }
+    .week-hero { grid-template-columns: 1fr; }
+    .topics-grid { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 1fr; }
+    .howto-trigger-sub { display: none; }
+  }
+
+  .tab-panel.active .howto-card { animation: fadeUp 0.3s ease both; }
+  .tab-panel.active .howto-card:nth-child(1) { animation-delay: 0.04s; }
+  .tab-panel.active .howto-card:nth-child(2) { animation-delay: 0.08s; }
+  .tab-panel.active .howto-card:nth-child(3) { animation-delay: 0.12s; }
+  .tab-panel.active .howto-card:nth-child(4) { animation-delay: 0.16s; }
+  .tab-panel.active .howto-card:nth-child(5) { animation-delay: 0.20s; }
+  .tab-panel.active .howto-card:nth-child(6) { animation-delay: 0.24s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* inline code */
+  ic { background: var(--surface2); padding: 1px 7px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #a78bfa; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-grid"></div>
+  <div class="header-glow"></div>
+  <div class="badge">Curso Intensivo · DevOps Architect Track · con How-To Guides</div>
+  <h1>De <span class="green">Zero</span> a<br><span class="purple">Microservicios</span><br>en Producción</h1>
+  <p class="subtitle">4 semanas, costo $0, arquitectura real. Cada sección incluye guías paso a paso con código listo para usar.</p>
+  <div class="stats-row">
+    <div class="stat"><span class="stat-val">4</span><span class="stat-label">Semanas</span></div>
+    <div class="stat"><span class="stat-val">$0</span><span class="stat-label">Costo</span></div>
+    <div class="stat"><span class="stat-val">24</span><span class="stat-label">How-To Guides</span></div>
+    <div class="stat"><span class="stat-val">4</span><span class="stat-label">Retos Finales</span></div>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" data-week="0" onclick="switchTab(0)"><span class="dot" style="background:#06b6d4"></span> Overview</button>
+  <button class="tab-btn" data-week="1" onclick="switchTab(1)"><span class="dot" style="background:var(--w1)"></span> Semana 1</button>
+  <button class="tab-btn" data-week="2" onclick="switchTab(2)"><span class="dot" style="background:var(--w2)"></span> Semana 2</button>
+  <button class="tab-btn" data-week="3" onclick="switchTab(3)"><span class="dot" style="background:var(--w3)"></span> Semana 3</button>
+  <button class="tab-btn" data-week="4" onclick="switchTab(4)"><span class="dot" style="background:var(--w4)"></span> Semana 4</button>
+</nav>
+
+<main>
+<!-- ══ TAB 0: OVERVIEW ══ -->
+<div class="tab-panel active" id="tab-0">
+  <div class="section-title">Mapa del Curso</div>
+  <div class="overview-grid">
+    <div class="week-card" data-goto="1" onclick="switchTab(1)">
+      <div class="week-card-num">SEMANA 01</div>
+      <div class="week-card-title">Fundamentos & Docker</div>
+      <div class="week-card-desc">Setup local, contenedores, networking y reverse proxy con Traefik.</div>
+    </div>
+    <div class="week-card" data-goto="2" onclick="switchTab(2)">
+      <div class="week-card-num">SEMANA 02</div>
+      <div class="week-card-title">CI/CD con GitHub Actions</div>
+      <div class="week-card-desc">Lint, tests, Docker Build & Push a GHCR. Self-hosted runner.</div>
+    </div>
+    <div class="week-card" data-goto="3" onclick="switchTab(3)">
+      <div class="week-card-num">SEMANA 03</div>
+      <div class="week-card-title">IaC & Kubernetes Local</div>
+      <div class="week-card-desc">OpenTofu, Kind, Helm charts y despliegue GitOps con ArgoCD.</div>
+    </div>
+    <div class="week-card" data-goto="4" onclick="switchTab(4)">
+      <div class="week-card-num">SEMANA 04</div>
+      <div class="week-card-title">Monitoreo & Cloud</div>
+      <div class="week-card-desc">Prometheus + Grafana, alertas y migración Low-Cost a AWS.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Arquitectura Final del MVP</div>
+  <div class="arch-diagram">
+    <div style="margin-bottom:20px; color: var(--accent); font-size:13px; font-weight:600;">// Arquitectura final — 2-tier app + observabilidad</div>
+    <div class="flow-row">
+      <div class="flow-node" style="border-color:#06b6d4;color:#06b6d4">Internet / Browser</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#00ff88;color:#00ff88">Traefik (Reverse Proxy)</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#a78bfa;color:#a78bfa">API Node.js / Python</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#f59e0b;color:#f59e0b">PostgreSQL</div>
+    </div>
+    <div style="margin-top:16px;" class="flow-row">
+      <div class="flow-node">API /metrics</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#f59e0b;color:#f59e0b">Prometheus</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#f97316;color:#f97316">Grafana</div>
+    </div>
+    <div style="margin-top:16px;" class="flow-row">
+      <div class="flow-node" style="border-color:#00ff88;color:#00ff88">git push</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node">GitHub Actions</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node">GHCR.io</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#a78bfa;color:#a78bfa">ArgoCD</div>
+      <span class="flow-arrow">──▶</span>
+      <div class="flow-node" style="border-color:#06b6d4;color:#06b6d4">Kind (K8s)</div>
+    </div>
+  </div>
+
+  <div class="section-title">Stack Completo</div>
+  <div class="stack-section">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:400;">Todo open-source · Sin costos de licencia</div>
+    <div class="stack-grid">
+      <div class="stack-item"><span class="stack-icon">🐳</span> Docker</div>
+      <div class="stack-item"><span class="stack-icon">☸️</span> Kubernetes (Kind)</div>
+      <div class="stack-item"><span class="stack-icon">⚓</span> Helm</div>
+      <div class="stack-item"><span class="stack-icon">🔄</span> ArgoCD</div>
+      <div class="stack-item"><span class="stack-icon">🏗️</span> OpenTofu (IaC)</div>
+      <div class="stack-item"><span class="stack-icon">⚙️</span> GitHub Actions</div>
+      <div class="stack-item"><span class="stack-icon">🔀</span> Traefik</div>
+      <div class="stack-item"><span class="stack-icon">📦</span> GHCR.io</div>
+      <div class="stack-item"><span class="stack-icon">📊</span> Prometheus</div>
+      <div class="stack-item"><span class="stack-icon">📈</span> Grafana</div>
+      <div class="stack-item"><span class="stack-icon">🌩️</span> LocalStack</div>
+      <div class="stack-item"><span class="stack-icon">🗄️</span> PostgreSQL</div>
+    </div>
+  </div>
+
+  <div class="section-title">Tips Clave para Entrevistas</div>
+  <div class="tip-box"><div class="tip-icon">🌐</div><div><div class="tip-title">DNS Local + mkcert</div><div class="tip-text">Edita <ic>/etc/hosts</ic> para mapear <ic>api.local</ic> y usa mkcert para generar certificados SSL locales. Simula un entorno productivo real.</div></div></div>
+  <div class="tip-box"><div class="tip-icon">🧪</div><div><div class="tip-title">LocalStack — AWS sin costo</div><div class="tip-text">Simula S3, Lambda, SQS, DynamoDB en tu Docker local. Prueba todos tus scripts de Terraform antes de ejecutarlos en una cuenta real.</div></div></div>
+  <div class="tip-box"><div class="tip-icon">🤖</div><div><div class="tip-title">Self-hosted GitHub Actions Runner</div><div class="tip-text">Configura tu propio agente de CI en tu máquina. Esencial para redes corporativas privadas y entornos on-premise.</div></div></div>
+  <div class="tip-box"><div class="tip-icon">☁️</div><div><div class="tip-title">Alternativas Low-Cost</div><div class="tip-text"><strong>Oracle Cloud</strong>: 4 instancias ARM gratis permanente. <strong>Fly.io / Railway</strong>: deploy de contenedores en segundos. <strong>AWS Lambda + Function URLs</strong>: evita el costo de ALBs.</div></div></div>
+</div>
+
+<!-- ══ TAB 1: SEMANA 1 ══ -->
+<div class="tab-panel" id="tab-1">
+  <div class="week-hero" data-week="1">
+    <div>
+      <div class="week-tag">Semana 01</div>
+      <div class="week-title">Entorno Local, Docker & Networking</div>
+      <div class="week-desc">Configura tu estación de trabajo como un DevOps profesional. Dockeriza la app de dos capas, networking entre contenedores y reverse proxy con Traefik + SSL local.</div>
+      <div class="tools-row">
+        <span class="tool-chip">Docker</span><span class="tool-chip">Docker Compose</span><span class="tool-chip">Traefik</span><span class="tool-chip">mkcert</span><span class="tool-chip">PostgreSQL</span><span class="tool-chip">Node.js/Python</span>
+      </div>
+    </div>
+    <div class="week-number">01</div>
+  </div>
+
+  <!-- HOW-TO GUIDES S1 -->
+  <div class="howto-section" data-week="1">
+    <div class="section-title">How-To Guides — Semana 1</div>
+    <div class="howto-grid">
+
+      <!-- 1.1 -->
+      <div class="howto-card" data-week="1">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">1.1</span>
+          <span class="howto-trigger-title">Setup del Entorno DevOps desde Cero</span>
+          <span class="howto-trigger-sub">Docker · Git · Estructura</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="1">
+          <p class="howto-intro">Antes de escribir una sola línea de código de infraestructura, necesitas un entorno limpio y reproducible. Este how-to cubre la instalación y configuración inicial que usarás durante todo el curso.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="1">01</div>
+              <div class="step-content">
+                <div class="step-title">Instalar Docker Engine (Linux) o Docker Desktop (Mac/Win)</div>
+                <div class="step-desc">En Ubuntu/Debian usa el script oficial. En macOS instala Docker Desktop desde el sitio oficial. Verifica que funcione correctamente después de instalar.</div>
+                <div class="step-code"><span class="sm"># Ubuntu/Debian</span>
+<span class="sk">curl</span> -fsSL https://get.docker.com | sh
+<span class="sk">sudo</span> usermod -aG docker $USER
+<span class="sm"># Reinicia sesión o ejecuta:</span>
+<span class="sk">newgrp</span> docker
+<span class="sk">docker</span> run hello-world   <span class="sm"># Debe mostrar "Hello from Docker!"</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">02</div>
+              <div class="step-content">
+                <div class="step-title">Crear la estructura de directorios del proyecto</div>
+                <div class="step-desc">Una estructura clara separa la app, la infraestructura y la configuración. Este layout es el que usarás durante todo el curso.</div>
+                <div class="step-code"><span class="sk">mkdir</span> -p mvp-devops/{app,infra/{terraform,k8s/helm},ci,.github/workflows}
+<span class="sk">cd</span> mvp-devops
+<span class="sk">git</span> init
+<span class="sm"># Estructura final:</span>
+<span class="sc">mvp-devops/</span>
+<span class="sc">├── app/</span>         <span class="sm"># Código de la API</span>
+<span class="sc">├── infra/</span>
+<span class="sc">│   ├── terraform/</span>   <span class="sm"># OpenTofu / Terraform</span>
+<span class="sc">│   └── k8s/helm/</span>    <span class="sm"># Helm charts</span>
+<span class="sc">├── ci/</span>          <span class="sm"># Scripts de CI</span>
+<span class="sc">└── .github/workflows/</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">03</div>
+              <div class="step-content">
+                <div class="step-title">Configurar .gitignore y variables de entorno</div>
+                <div class="step-desc">Nunca commitees secretos. Crea un .env.example como contrato del equipo y agrega .env al .gitignore.</div>
+                <div class="step-code"><span class="sm"># .env.example — commitealo</span>
+<span class="sv">POSTGRES_USER</span>=postgres
+<span class="sv">POSTGRES_PASSWORD</span>=changeme
+<span class="sv">POSTGRES_DB</span>=appdb
+<span class="sv">API_PORT</span>=3000
+<span class="sv">NODE_ENV</span>=development
+
+<span class="sm"># .gitignore</span>
+<span class="sc">.env</span>
+<span class="sc">*.pem</span>
+<span class="sc">*.key</span>
+<span class="sc">node_modules/</span>
+<span class="sc">__pycache__/</span>
+<span class="sc">.terraform/</span></div>
+              </div>
+            </div>
+            <div class="ok-box">💡 <strong>Pro tip:</strong> usa <ic>direnv</ic> para cargar automáticamente el .env cuando entras al directorio del proyecto. Se instala con <ic>brew install direnv</ic> o <ic>apt install direnv</ic>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.2 -->
+      <div class="howto-card" data-week="1">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">1.2</span>
+          <span class="howto-trigger-title">Dockerfile Multi-Stage para Node.js/Python</span>
+          <span class="howto-trigger-sub">Docker · BuildKit · Optimización</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="1">
+          <p class="howto-intro">Un Dockerfile multi-stage separa el entorno de build del de producción. El resultado es una imagen mínima que va al registro, no una imagen con todas las herramientas de compilación.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="1">01</div>
+              <div class="step-content">
+                <div class="step-title">Dockerfile multi-stage para Node.js (API Express)</div>
+                <div class="step-desc">Tres stages: deps (instala dependencias), build (compila TypeScript si aplica), y production (imagen final mínima).</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">app/Dockerfile</span><span class="file-lang">dockerfile</span></div>
+                  <div class="file-body">
+<span class="sm"># ── Stage 1: Dependencias ──</span>
+<span class="sk">FROM</span> <span class="sc">node:20-alpine</span> <span class="sk">AS</span> deps
+<span class="sk">WORKDIR</span> /app
+<span class="sk">COPY</span> package*.json ./
+<span class="sk">RUN</span> npm ci --only=production
+
+<span class="sm"># ── Stage 2: Build ──</span>
+<span class="sk">FROM</span> <span class="sc">node:20-alpine</span> <span class="sk">AS</span> build
+<span class="sk">WORKDIR</span> /app
+<span class="sk">COPY</span> package*.json ./
+<span class="sk">RUN</span> npm ci
+<span class="sk">COPY</span> . .
+<span class="sk">RUN</span> npm run build   <span class="sm"># tsc, si usas TypeScript</span>
+
+<span class="sm"># ── Stage 3: Producción ──</span>
+<span class="sk">FROM</span> <span class="sc">node:20-alpine</span> <span class="sk">AS</span> production
+<span class="sk">ENV</span> <span class="sv">NODE_ENV</span>=production
+<span class="sk">WORKDIR</span> /app
+<span class="sk">COPY</span> --from=deps /app/node_modules ./node_modules
+<span class="sk">COPY</span> --from=build /app/dist ./dist
+<span class="sk">COPY</span> package.json .
+<span class="sk">RUN</span> addgroup -S app &amp;&amp; adduser -S app -G app
+<span class="sk">USER</span> app
+<span class="sk">EXPOSE</span> 3000
+<span class="sk">HEALTHCHECK</span> --interval=30s --timeout=5s \
+  <span class="sk">CMD</span> wget -qO- http://localhost:3000/health || exit 1
+<span class="sk">CMD</span> ["node", "dist/index.js"]</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">02</div>
+              <div class="step-content">
+                <div class="step-title">Buildear y verificar el tamaño de la imagen</div>
+                <div class="step-desc">Con BuildKit habilitado el build es más rápido y paralelo. Compara el tamaño entre stages.</div>
+                <div class="step-code"><span class="sm"># Habilitar BuildKit (moderno, más rápido)</span>
+<span class="sk">export</span> <span class="sv">DOCKER_BUILDKIT</span>=1
+
+<span class="sm"># Build solo el stage de producción</span>
+<span class="sk">docker</span> build --target production -t myapp:latest .
+
+<span class="sm"># Ver tamaño final (debe ser &lt;150MB)</span>
+<span class="sk">docker</span> images myapp
+
+<span class="sm"># Ver capas y tamaños individuales</span>
+<span class="sk">docker</span> history myapp:latest --format "table {{.Size}}\t{{.CreatedBy}}"</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">03</div>
+              <div class="step-content">
+                <div class="step-title">Escanear vulnerabilidades con Docker Scout</div>
+                <div class="step-desc">Antes de publicar cualquier imagen, verifica que no tenga CVEs críticos. Docker Scout está integrado en Docker Desktop.</div>
+                <div class="step-code"><span class="sm"># Escanear la imagen local</span>
+<span class="sk">docker</span> scout cves myapp:latest
+
+<span class="sm"># Solo vulnerabilidades críticas y altas</span>
+<span class="sk">docker</span> scout cves --only-severity critical,high myapp:latest
+
+<span class="sm"># Comparar con la versión anterior</span>
+<span class="sk">docker</span> scout compare myapp:latest --to myapp:previous</div>
+              </div>
+            </div>
+            <div class="warn-box">⚠️ <strong>Alpine vs Distroless:</strong> Alpine es pequeño pero usa musl libc, lo que puede causar incompatibilidades con algunas libs. Para producción seria, considera <ic>gcr.io/distroless/nodejs20</ic> como imagen base del stage final.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.3 -->
+      <div class="howto-card" data-week="1">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">1.3</span>
+          <span class="howto-trigger-title">Networking entre Contenedores en Docker</span>
+          <span class="howto-trigger-sub">Bridge Networks · DNS interno · Debugging</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="1">
+          <p class="howto-intro">Docker tiene su propio sistema de DNS interno. Los contenedores en la misma red se comunican por nombre de servicio, igual que en Kubernetes. Entender esto es clave para hacer troubleshooting.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="1">01</div>
+              <div class="step-content">
+                <div class="step-title">Crear una red bridge dedicada</div>
+                <div class="step-desc">Nunca uses la red default de Docker. Crea redes nombradas para cada proyecto, así los contenedores están aislados y se comunican por nombre.</div>
+                <div class="step-code"><span class="sm"># Crear red con subnet explícita</span>
+<span class="sk">docker</span> network create \
+  --driver bridge \
+  --subnet 172.20.0.0/16 \
+  app-network
+
+<span class="sm"># Verificar la red</span>
+<span class="sk">docker</span> network inspect app-network | jq '.[0].IPAM'
+
+<span class="sm"># Conectar contenedor existente a la red</span>
+<span class="sk">docker</span> network connect app-network mi-contenedor</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">02</div>
+              <div class="step-content">
+                <div class="step-title">Verificar DNS interno entre contenedores</div>
+                <div class="step-desc">Dentro de una red bridge, cada contenedor puede resolver los otros por nombre. Esto es lo que hace Docker Compose automáticamente.</div>
+                <div class="step-code"><span class="sm"># Desde el contenedor API, pingar la DB por nombre</span>
+<span class="sk">docker</span> exec -it api sh -c "ping db -c 3"
+<span class="sk">docker</span> exec -it api sh -c "nslookup db"
+<span class="sk">docker</span> exec -it api sh -c "curl -v http://db:5432"
+
+<span class="sm"># Ver tabla de resolución DNS de Docker</span>
+<span class="sk">docker</span> exec -it api cat /etc/resolv.conf
+
+<span class="sm"># Ver todos los hosts en la red</span>
+<span class="sk">docker</span> network inspect app-network \
+  --format '{{range .Containers}}{{.Name}}: {{.IPv4Address}}{{"\n"}}{{end}}'</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">03</div>
+              <div class="step-content">
+                <div class="step-title">Diferencia entre EXPOSE y -p (ports)</div>
+                <div class="step-desc">EXPOSE es documentación. Solo -p/-P abre el puerto al host. En Docker Compose, usa ports para acceso externo y deja sin ports para servicios internos.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">docker-compose.yml (fragmento)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">services</span>:
+  <span class="sc">api</span>:
+    <span class="sk">build</span>: ./app
+    <span class="sk">ports</span>:            <span class="sm"># Abre al host (acceso externo)</span>
+      - <span class="ss">"3000:3000"</span>
+    <span class="sk">networks</span>: [app-net]
+
+  <span class="sc">db</span>:
+    <span class="sk">image</span>: postgres:16-alpine
+    <span class="sm"># Sin "ports:" → solo accesible internamente</span>
+    <span class="sm"># La API se conecta con: postgres://db:5432</span>
+    <span class="sk">expose</span>: [<span class="ss">"5432"</span>]   <span class="sm"># Solo documentación</span>
+    <span class="sk">networks</span>: [app-net]
+
+<span class="sk">networks</span>:
+  <span class="sc">app-net</span>:
+    <span class="sk">driver</span>: bridge</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.4 -->
+      <div class="howto-card" data-week="1">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">1.4</span>
+          <span class="howto-trigger-title">Docker Compose Completo con Healthchecks y Perfiles</span>
+          <span class="howto-trigger-sub">Compose · depends_on · Perfiles dev/prod</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="1">
+          <p class="howto-intro">Un docker-compose.yml profesional no solo lista servicios — controla el orden de arranque con healthchecks reales, maneja configuraciones por ambiente con perfiles, y usa variables para no hardcodear nada.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="1">01</div>
+              <div class="step-content">
+                <div class="step-title">Compose completo con healthchecks y depends_on correcto</div>
+                <div class="step-desc">El error más común es usar <ic>depends_on: db</ic> sin condition. Esto solo espera a que el contenedor inicie, no a que PostgreSQL esté listo para aceptar conexiones.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">docker-compose.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">name</span>: mvp-app
+
+<span class="sk">services</span>:
+  <span class="sc">db</span>:
+    <span class="sk">image</span>: postgres:16-alpine
+    <span class="sk">environment</span>:
+      <span class="sv">POSTGRES_USER</span>: <span class="ss">${POSTGRES_USER}</span>
+      <span class="sv">POSTGRES_PASSWORD</span>: <span class="ss">${POSTGRES_PASSWORD}</span>
+      <span class="sv">POSTGRES_DB</span>: <span class="ss">${POSTGRES_DB}</span>
+    <span class="sk">volumes</span>:
+      - <span class="sc">pgdata:/var/lib/postgresql/data</span>
+      - <span class="sc">./infra/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql</span>
+    <span class="sk">healthcheck</span>:
+      <span class="sk">test</span>: [<span class="ss">"CMD-SHELL"</span>, <span class="ss">"pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"</span>]
+      <span class="sk">interval</span>: 5s
+      <span class="sk">timeout</span>: 3s
+      <span class="sk">retries</span>: 10
+      <span class="sk">start_period</span>: 10s
+    <span class="sk">networks</span>: [app-net]
+
+  <span class="sc">api</span>:
+    <span class="sk">build</span>:
+      <span class="sk">context</span>: ./app
+      <span class="sk">target</span>: production
+    <span class="sk">environment</span>:
+      <span class="sv">DATABASE_URL</span>: postgres://<span class="ss">${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}</span>
+      <span class="sv">NODE_ENV</span>: production
+    <span class="sk">depends_on</span>:           <span class="sm"># ← Espera healthcheck real</span>
+      <span class="sc">db</span>:
+        <span class="sk">condition</span>: service_healthy
+    <span class="sk">ports</span>: [<span class="ss">"3000:3000"</span>]
+    <span class="sk">networks</span>: [app-net]
+    <span class="sk">restart</span>: unless-stopped
+    <span class="sk">profiles</span>: [dev, prod]
+
+  <span class="sm"># Solo en perfil dev:</span>
+  <span class="sc">adminer</span>:
+    <span class="sk">image</span>: adminer
+    <span class="sk">ports</span>: [<span class="ss">"8080:8080"</span>]
+    <span class="sk">depends_on</span>: [db]
+    <span class="sk">networks</span>: [app-net]
+    <span class="sk">profiles</span>: [dev]   <span class="sm"># ← Solo se levanta con --profile dev</span>
+
+<span class="sk">volumes</span>:
+  <span class="sc">pgdata</span>:
+
+<span class="sk">networks</span>:
+  <span class="sc">app-net</span>:
+    <span class="sk">driver</span>: bridge</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">02</div>
+              <div class="step-content">
+                <div class="step-title">Usar perfiles para separar dev y prod</div>
+                <div class="step-desc">Los perfiles permiten levantar servicios adicionales solo en desarrollo (adminer, mailhog, redis-commander) sin tocar la config de producción.</div>
+                <div class="step-code"><span class="sm"># Desarrollo: levanta API + DB + Adminer</span>
+<span class="sk">docker</span> compose --profile dev up -d
+
+<span class="sm"># Producción: solo API + DB</span>
+<span class="sk">docker</span> compose --profile prod up -d
+
+<span class="sm"># Ver estado y healthchecks</span>
+<span class="sk">docker</span> compose ps
+
+<span class="sm"># Seguir logs de un servicio específico</span>
+<span class="sk">docker</span> compose logs -f --tail=50 api</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.5 -->
+      <div class="howto-card" data-week="1">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">1.5</span>
+          <span class="howto-trigger-title">Reverse Proxy con Traefik + SSL Local (mkcert)</span>
+          <span class="howto-trigger-sub">Traefik · TLS · api.local · mkcert</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="1">
+          <p class="howto-intro">Traefik se auto-configura leyendo los labels de Docker. No necesitas reiniciarlo cuando agregas servicios. Aquí lo configuramos con HTTPS local real usando mkcert para que Chrome no muestre warnings.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="1">01</div>
+              <div class="step-content">
+                <div class="step-title">Instalar mkcert y generar certificados</div>
+                <div class="step-desc">mkcert crea una CA local y genera certs firmados por ella. El navegador los acepta sin warnings después de instalar la CA.</div>
+                <div class="step-code"><span class="sm"># Instalar mkcert</span>
+<span class="sm"># macOS:</span>
+<span class="sk">brew</span> install mkcert nss
+<span class="sm"># Linux:</span>
+<span class="sk">sudo</span> apt install libnss3-tools
+<span class="sk">curl</span> -Lo mkcert https://github.com/FiloSottile/mkcert/releases/latest/download/mkcert-v1.4.4-linux-amd64
+<span class="sk">chmod</span> +x mkcert && sudo mv mkcert /usr/local/bin/
+
+<span class="sm"># Instalar la CA raíz en el sistema</span>
+<span class="sk">mkcert</span> -install
+
+<span class="sm"># Generar cert para api.local y *.api.local</span>
+<span class="sk">mkdir</span> -p infra/traefik/certs
+<span class="sk">cd</span> infra/traefik/certs
+<span class="sk">mkcert</span> api.local "*.api.local" localhost 127.0.0.1
+
+<span class="sm"># Agrega al /etc/hosts</span>
+echo <span class="ss">"127.0.0.1 api.local"</span> | sudo tee -a /etc/hosts</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">02</div>
+              <div class="step-content">
+                <div class="step-title">Configurar Traefik con Docker provider y TLS</div>
+                <div class="step-desc">Traefik necesita dos archivos de config: traefik.yml (estático) y un archivo de TLS dinámico. El provider de Docker lee automáticamente los labels.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/traefik/traefik.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">api</span>:
+  <span class="sk">dashboard</span>: <span class="sc">true</span>
+  <span class="sk">insecure</span>: <span class="sc">true</span>   <span class="sm"># Dashboard en :8080 (solo dev)</span>
+
+<span class="sk">entryPoints</span>:
+  <span class="sc">web</span>:
+    <span class="sk">address</span>: <span class="ss">":80"</span>
+    <span class="sk">http</span>:
+      <span class="sk">redirections</span>:
+        <span class="sk">entryPoint</span>: { to: websecure, scheme: https }
+  <span class="sc">websecure</span>:
+    <span class="sk">address</span>: <span class="ss">":443"</span>
+
+<span class="sk">providers</span>:
+  <span class="sc">docker</span>:
+    <span class="sk">endpoint</span>: <span class="ss">"unix:///var/run/docker.sock"</span>
+    <span class="sk">exposedByDefault</span>: <span class="sc">false</span>
+  <span class="sc">file</span>:
+    <span class="sk">filename</span>: /etc/traefik/dynamic.yml
+    <span class="sk">watch</span>: <span class="sc">true</span></div>
+                </div>
+                <div class="file-block" style="margin-top:10px">
+                  <div class="file-header"><span class="file-name">infra/traefik/dynamic.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">tls</span>:
+  <span class="sk">certificates</span>:
+    - <span class="sk">certFile</span>: /etc/traefik/certs/api.local+3.pem
+      <span class="sk">keyFile</span>: /etc/traefik/certs/api.local+3-key.pem</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">03</div>
+              <div class="step-content">
+                <div class="step-title">Agregar Traefik al docker-compose y labels a la API</div>
+                <div class="step-desc">Los labels le dicen a Traefik cómo rutear al servicio. Con esto, cuando inicias la API, Traefik la detecta automáticamente.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">docker-compose.yml (agrega estos servicios)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sc">traefik</span>:
+  <span class="sk">image</span>: traefik:v3.0
+  <span class="sk">ports</span>:
+    - <span class="ss">"80:80"</span>
+    - <span class="ss">"443:443"</span>
+    - <span class="ss">"8080:8080"</span>   <span class="sm"># Dashboard</span>
+  <span class="sk">volumes</span>:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    - ./infra/traefik/certs:/etc/traefik/certs:ro
+  <span class="sk">networks</span>: [app-net]
+
+<span class="sc">api</span>:
+  <span class="sm"># ... build, environment, etc ...</span>
+  <span class="sk">labels</span>:
+    - <span class="ss">"traefik.enable=true"</span>
+    - <span class="ss">"traefik.http.routers.api.rule=Host(`api.local`)"</span>
+    - <span class="ss">"traefik.http.routers.api.entrypoints=websecure"</span>
+    - <span class="ss">"traefik.http.routers.api.tls=true"</span>
+    - <span class="ss">"traefik.http.services.api.loadbalancer.server.port=3000"</span>
+  <span class="sk">networks</span>: [app-net]</div>
+                </div>
+              </div>
+            </div>
+            <div class="ok-box">✅ <strong>Resultado esperado:</strong> <ic>https://api.local/health</ic> debe responder con un candado verde en Chrome. Si ves warning, ejecuta <ic>mkcert -install</ic> de nuevo y reinicia el navegador.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.6 -->
+      <div class="howto-card" data-week="1">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">1.6</span>
+          <span class="howto-trigger-title">PostgreSQL en Contenedor con Migraciones</span>
+          <span class="howto-trigger-sub">PostgreSQL · Flyway · pg_dump · PgBouncer</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="1">
+          <p class="howto-intro">Una base de datos en producción necesita migraciones versionadas, backups automatizados y connection pooling. Aquí configuramos todo desde Docker Compose.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="1">01</div>
+              <div class="step-content">
+                <div class="step-title">Init script y migraciones con SQL puro</div>
+                <div class="step-desc">PostgreSQL ejecuta automáticamente cualquier archivo .sql en <ic>/docker-entrypoint-initdb.d/</ic> al crear el contenedor por primera vez.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/db/init.sql</span><span class="file-lang">sql</span></div>
+                  <div class="file-body">
+<span class="sm">-- Crear schema y tabla inicial</span>
+<span class="sk">CREATE SCHEMA IF NOT EXISTS</span> app;
+
+<span class="sk">CREATE TABLE IF NOT EXISTS</span> app.users (
+  id        UUID <span class="sk">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  email     TEXT <span class="sk">UNIQUE NOT NULL</span>,
+  name      TEXT <span class="sk">NOT NULL</span>,
+  created_at TIMESTAMPTZ <span class="sk">DEFAULT</span> now()
+);
+
+<span class="sk">CREATE INDEX</span> idx_users_email <span class="sk">ON</span> app.users(email);
+
+<span class="sm">-- Datos de seed para desarrollo</span>
+<span class="sk">INSERT INTO</span> app.users (email, name) <span class="sk">VALUES</span>
+  (<span class="ss">'admin@local.dev'</span>, <span class="ss">'Admin User'</span>)
+<span class="sk">ON CONFLICT DO NOTHING</span>;</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">02</div>
+              <div class="step-content">
+                <div class="step-title">Backup y restore con pg_dump desde Docker</div>
+                <div class="step-desc">No necesitas instalar PostgreSQL en tu host. Ejecuta pg_dump directo desde el contenedor y guarda el backup en el host.</div>
+                <div class="step-code"><span class="sm"># Backup completo a archivo SQL</span>
+<span class="sk">docker</span> compose exec db pg_dump \
+  -U $POSTGRES_USER \
+  -d $POSTGRES_DB \
+  --format=custom \
+  --file=/tmp/backup.dump
+
+<span class="sm"># Copiar backup al host</span>
+<span class="sk">docker</span> compose cp db:/tmp/backup.dump ./backups/$(date +%Y%m%d).dump
+
+<span class="sm"># Restore desde backup</span>
+<span class="sk">docker</span> compose exec -T db pg_restore \
+  -U $POSTGRES_USER \
+  -d $POSTGRES_DB \
+  --clean --if-exists \
+  &lt; ./backups/20240101.dump</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="1">03</div>
+              <div class="step-content">
+                <div class="step-title">Agregar PgBouncer como connection pooler (BONUS)</div>
+                <div class="step-desc">PgBouncer reduce drásticamente las conexiones a PostgreSQL. La API conecta a PgBouncer:5432 en lugar de a Postgres directamente.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">docker-compose.yml (add pgbouncer)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sc">pgbouncer</span>:
+  <span class="sk">image</span>: bitnami/pgbouncer:latest
+  <span class="sk">environment</span>:
+    <span class="sv">POSTGRESQL_HOST</span>: db
+    <span class="sv">POSTGRESQL_PORT</span>: 5432
+    <span class="sv">POSTGRESQL_USERNAME</span>: <span class="ss">${POSTGRES_USER}</span>
+    <span class="sv">POSTGRESQL_PASSWORD</span>: <span class="ss">${POSTGRES_PASSWORD}</span>
+    <span class="sv">POSTGRESQL_DATABASE</span>: <span class="ss">${POSTGRES_DB}</span>
+    <span class="sv">PGBOUNCER_POOL_MODE</span>: transaction
+    <span class="sv">PGBOUNCER_MAX_CLIENT_CONN</span>: 200
+    <span class="sv">PGBOUNCER_DEFAULT_POOL_SIZE</span>: 20
+  <span class="sk">depends_on</span>:
+    <span class="sc">db</span>: { <span class="sk">condition</span>: service_healthy }
+  <span class="sk">networks</span>: [app-net]
+
+<span class="sm"># En la API, cambia DATABASE_URL a:</span>
+<span class="sm"># postgres://user:pass@pgbouncer:5432/db</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /howto-grid -->
+  </div><!-- /howto-section -->
+
+  <!-- RETO SEMANA 1 -->
+  <div class="section" data-week="1">
+    <div class="section-title">Reto Final — Semana 1</div>
+    <div class="challenge-card" data-week="1">
+      <div class="challenge-label">🏆 Challenge · Semana 1</div>
+      <div class="challenge-title">Levanta el MVP local con SSL y dominio custom</div>
+      <div class="challenge-desc">Construye un entorno local completamente funcional donde la app de dos capas sea accesible en <ic>https://api.local</ic> con certificado SSL válido, Traefik como proxy, y la API conectada a PostgreSQL. Todo orquestado con un solo comando.</div>
+      <div class="deliverables">
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span><ic>docker compose up -d</ic> levanta API + DB + Traefik en una sola red</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span><ic>https://api.local/health</ic> responde 200 con cert mkcert (sin warning)</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>La API puede leer y escribir en PostgreSQL (endpoint <ic>GET /users</ic>)</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Imagen Docker multi-stage con build de producción &lt; 150MB</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Dockerfile pasa <ic>docker scout cves</ic> sin vulnerabilidades críticas</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>BONUS: PgBouncer como sidecar del contenedor PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-1 -->
+
+<!-- ══ TAB 2: SEMANA 2 ══ -->
+<div class="tab-panel" id="tab-2">
+  <div class="week-hero" data-week="2">
+    <div>
+      <div class="week-tag">Semana 02</div>
+      <div class="week-title">CI/CD con GitHub Actions</div>
+      <div class="week-desc">Automatiza todo el ciclo de vida del código. Desde lint y tests hasta la construcción y publicación de imágenes en GHCR.io. Self-hosted runner en tu propia máquina.</div>
+      <div class="tools-row">
+        <span class="tool-chip">GitHub Actions</span><span class="tool-chip">GHCR.io</span><span class="tool-chip">Docker Buildx</span><span class="tool-chip">pytest/jest</span><span class="tool-chip">Trivy</span><span class="tool-chip">Self-hosted Runner</span>
+      </div>
+    </div>
+    <div class="week-number">02</div>
+  </div>
+
+  <div class="howto-section" data-week="2">
+    <div class="section-title">How-To Guides — Semana 2</div>
+    <div class="howto-grid">
+
+      <!-- 2.1 -->
+      <div class="howto-card" data-week="2">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">2.1</span>
+          <span class="howto-trigger-title">Primer Workflow de GitHub Actions</span>
+          <span class="howto-trigger-sub">Workflows · Jobs · Contexts · Secrets</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="2">
+          <p class="howto-intro">Un workflow de GitHub Actions es un archivo YAML que define qué pasa cuando ocurre un evento en el repositorio. Aquí construimos el esqueleto que usaremos durante toda la semana.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="2">01</div>
+              <div class="step-content">
+                <div class="step-title">Estructura base del workflow CI</div>
+                <div class="step-desc">El workflow se activa en push a main y en pull requests. Tiene jobs separados para lint, test y build que corren en paralelo donde es posible.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">.github/workflows/ci.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">name</span>: CI Pipeline
+
+<span class="sk">on</span>:
+  <span class="sc">push</span>:
+    <span class="sk">branches</span>: [main, develop]
+  <span class="sc">pull_request</span>:
+    <span class="sk">branches</span>: [main]
+  <span class="sc">workflow_dispatch</span>:   <span class="sm"># Permite ejecución manual</span>
+
+<span class="sk">env</span>:
+  <span class="sv">REGISTRY</span>: ghcr.io
+  <span class="sv">IMAGE_NAME</span>: <span class="ss">${{ github.repository }}</span>
+
+<span class="sk">jobs</span>:
+  <span class="sc">lint</span>:
+    <span class="sk">runs-on</span>: ubuntu-latest
+    <span class="sk">steps</span>:
+      - <span class="sk">uses</span>: actions/checkout@v4
+      - <span class="sk">uses</span>: actions/setup-node@v4
+        <span class="sk">with</span>: { node-version: <span class="ss">'20'</span>, cache: <span class="ss">'npm'</span> }
+      - <span class="sk">run</span>: npm ci
+      - <span class="sk">run</span>: npm run lint
+      - <span class="sk">run</span>: npm run typecheck
+
+  <span class="sc">test</span>:
+    <span class="sk">runs-on</span>: ubuntu-latest
+    <span class="sk">services</span>:               <span class="sm"># Levanta DB para integration tests</span>
+      <span class="sc">postgres</span>:
+        <span class="sk">image</span>: postgres:16-alpine
+        <span class="sk">env</span>:
+          <span class="sv">POSTGRES_PASSWORD</span>: testpass
+          <span class="sv">POSTGRES_DB</span>: testdb
+        <span class="sk">options</span>: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-retries 5
+    <span class="sk">steps</span>:
+      - <span class="sk">uses</span>: actions/checkout@v4
+      - <span class="sk">uses</span>: actions/setup-node@v4
+        <span class="sk">with</span>: { node-version: <span class="ss">'20'</span>, cache: <span class="ss">'npm'</span> }
+      - <span class="sk">run</span>: npm ci
+      - <span class="sk">run</span>: npm test -- --coverage
+        <span class="sk">env</span>:
+          <span class="sv">DATABASE_URL</span>: postgres://postgres:testpass@localhost:5432/testdb</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="2">02</div>
+              <div class="step-content">
+                <div class="step-title">Usar secrets y variables de entorno de forma segura</div>
+                <div class="step-desc">Los secrets nunca aparecen en los logs. Se configuran en Settings → Secrets del repo y se referencian con la sintaxis <ic>${{ secrets.NOMBRE }}</ic>.</div>
+                <div class="step-code"><span class="sm"># En GitHub: Settings → Secrets and Variables → Actions</span>
+<span class="sm"># Agregar: DATABASE_URL, SLACK_WEBHOOK, etc.</span>
+
+<span class="sm"># En el workflow:</span>
+<span class="sc">- name</span>: Deploy to EC2
+  <span class="sk">run</span>: |
+    echo <span class="ss">"${{ secrets.EC2_SSH_KEY }}"</span> &gt; key.pem
+    chmod 600 key.pem
+    ssh -i key.pem ubuntu@<span class="ss">${{ secrets.EC2_HOST }}</span> \
+      <span class="ss">'docker compose pull && docker compose up -d'</span>
+
+<span class="sm"># Variables (no secretas, visibles en logs):</span>
+<span class="sc">- name</span>: Print env info
+  <span class="sk">run</span>: echo <span class="ss">"Branch: ${{ github.ref_name }}, SHA: ${{ github.sha }}"</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="2">03</div>
+              <div class="step-content">
+                <div class="step-title">Cache de dependencias para acelerar el pipeline</div>
+                <div class="step-desc">Con cache, un pipeline que tardaba 4 minutos puede bajar a 45 segundos. GitHub Actions tiene cache basado en claves hash del package-lock.json.</div>
+                <div class="step-code"><span class="sm"># Cache de node_modules (se invalida si cambia package-lock.json)</span>
+<span class="sc">- uses</span>: actions/cache@v4
+  <span class="sk">with</span>:
+    <span class="sk">path</span>: ~/.npm
+    <span class="sk">key</span>: <span class="ss">${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}</span>
+    <span class="sk">restore-keys</span>: |
+      <span class="ss">${{ runner.os }}-node-</span>
+
+<span class="sm"># O más simple, usa el parámetro cache de setup-node:</span>
+<span class="sc">- uses</span>: actions/setup-node@v4
+  <span class="sk">with</span>:
+    <span class="sk">node-version</span>: <span class="ss">'20'</span>
+    <span class="sk">cache</span>: <span class="ss">'npm'</span>   <span class="sm"># ← Hace el cache automáticamente</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 -->
+      <div class="howto-card" data-week="2">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">2.2</span>
+          <span class="howto-trigger-title">Docker Build Multi-Platform y Push a GHCR.io</span>
+          <span class="howto-trigger-sub">Buildx · amd64/arm64 · GHCR · Semantic Tags</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="2">
+          <p class="howto-intro">Construir para múltiples arquitecturas es esencial hoy en día: los Macs son ARM, los servidores son x86. Con Buildx y QEMU puedes hacer el build una sola vez y publicar un manifest multi-arch.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="2">01</div>
+              <div class="step-content">
+                <div class="step-title">Job de build y push a GHCR con multi-platform</div>
+                <div class="step-desc">Este job usa Docker Buildx con el driver docker-container que soporta multi-platform. Se autentica a GHCR con el GITHUB_TOKEN automático.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">.github/workflows/ci.yml (job build-push)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+  <span class="sc">build-push</span>:
+    <span class="sk">needs</span>: [lint, test, security]
+    <span class="sk">runs-on</span>: ubuntu-latest
+    <span class="sk">permissions</span>:
+      <span class="sc">contents</span>: read
+      <span class="sc">packages</span>: write   <span class="sm"># Necesario para push a GHCR</span>
+    <span class="sk">steps</span>:
+      - <span class="sk">uses</span>: actions/checkout@v4
+
+      - <span class="sk">name</span>: Set up QEMU (cross-compilation)
+        <span class="sk">uses</span>: docker/setup-qemu-action@v3
+
+      - <span class="sk">name</span>: Set up Docker Buildx
+        <span class="sk">uses</span>: docker/setup-buildx-action@v3
+
+      - <span class="sk">name</span>: Login to GHCR
+        <span class="sk">uses</span>: docker/login-action@v3
+        <span class="sk">with</span>:
+          <span class="sk">registry</span>: ghcr.io
+          <span class="sk">username</span>: <span class="ss">${{ github.actor }}</span>
+          <span class="sk">password</span>: <span class="ss">${{ secrets.GITHUB_TOKEN }}</span>
+
+      - <span class="sk">name</span>: Extract metadata (tags)
+        <span class="sk">id</span>: meta
+        <span class="sk">uses</span>: docker/metadata-action@v5
+        <span class="sk">with</span>:
+          <span class="sk">images</span>: ghcr.io/<span class="ss">${{ github.repository }}</span>
+          <span class="sk">tags</span>: |
+            type=sha,prefix=sha-         <span class="sm"># sha-abc1234</span>
+            type=ref,event=branch        <span class="sm"># main, develop</span>
+            type=semver,pattern={{version}} <span class="sm"># v1.2.3</span>
+            type=raw,value=latest,enable=<span class="ss">${{ github.ref == 'refs/heads/main' }}</span>
+
+      - <span class="sk">name</span>: Build and push
+        <span class="sk">uses</span>: docker/build-push-action@v5
+        <span class="sk">with</span>:
+          <span class="sk">context</span>: ./app
+          <span class="sk">target</span>: production
+          <span class="sk">platforms</span>: linux/amd64,linux/arm64
+          <span class="sk">push</span>: <span class="ss">${{ github.event_name != 'pull_request' }}</span>
+          <span class="sk">tags</span>: <span class="ss">${{ steps.meta.outputs.tags }}</span>
+          <span class="sk">cache-from</span>: type=gha
+          <span class="sk">cache-to</span>: type=gha,mode=max</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="2">02</div>
+              <div class="step-content">
+                <div class="step-title">Verificar la imagen publicada en GHCR</div>
+                <div class="step-desc">Después del push puedes ver el paquete en GitHub → Packages de tu repo. Con docker manifest inspect verificas el multi-arch.</div>
+                <div class="step-code"><span class="sm"># Pull de imagen por SHA específico</span>
+<span class="sk">docker</span> pull ghcr.io/tu-usuario/myapp:sha-abc1234
+
+<span class="sm"># Verificar que tiene ambas arquitecturas</span>
+<span class="sk">docker</span> manifest inspect ghcr.io/tu-usuario/myapp:latest
+
+<span class="sm"># Hacer la imagen pública (si quieres)</span>
+<span class="sm"># GitHub → tu repo → Packages → Change visibility</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.3 -->
+      <div class="howto-card" data-week="2">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">2.3</span>
+          <span class="howto-trigger-title">Configurar Self-Hosted Runner en tu Máquina</span>
+          <span class="howto-trigger-sub">Runner · systemd · Labels · Seguridad</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="2">
+          <p class="howto-intro">Un self-hosted runner ejecuta los jobs de CI en tu propia máquina. No gastas minutos de GitHub, tienes acceso a tu red local, y aprendes cómo funcionan los agentes de CI de Jenkins, GitLab o CircleCI.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="2">01</div>
+              <div class="step-content">
+                <div class="step-title">Registrar el runner en GitHub</div>
+                <div class="step-desc">Ve a tu repo → Settings → Actions → Runners → New self-hosted runner. GitHub te da el token y los comandos de instalación.</div>
+                <div class="step-code"><span class="sm"># Descarga el runner (ajusta versión y OS)</span>
+<span class="sk">mkdir</span> actions-runner && cd actions-runner
+<span class="sk">curl</span> -o actions-runner-linux-x64-2.316.1.tar.gz -L \
+  https://github.com/actions/runner/releases/download/v2.316.1/actions-runner-linux-x64-2.316.1.tar.gz
+<span class="sk">tar</span> xzf ./actions-runner-linux-x64-2.316.1.tar.gz
+
+<span class="sm"># Configurar con el token que te da GitHub</span>
+<span class="sk">./config.sh</span> \
+  --url https://github.com/TU-ORG/TU-REPO \
+  --token TOKEN_QUE_DA_GITHUB \
+  --name mi-runner-local \
+  --labels self-hosted,linux,x64,local \
+  --work _work</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="2">02</div>
+              <div class="step-content">
+                <div class="step-title">Instalar como servicio systemd (para que arranque automáticamente)</div>
+                <div class="step-desc">En lugar de dejar el runner corriendo en una terminal, instálalo como servicio del sistema operativo. Esto es exactamente cómo lo hacen en entornos corporativos.</div>
+                <div class="step-code"><span class="sm"># Instalar como servicio</span>
+<span class="sk">sudo</span> ./svc.sh install
+<span class="sk">sudo</span> ./svc.sh start
+
+<span class="sm"># Verificar estado</span>
+<span class="sk">sudo</span> ./svc.sh status
+
+<span class="sm"># Ver logs del runner</span>
+<span class="sk">journalctl</span> -u actions.runner.*.service -f
+
+<span class="sm"># Detener y desinstalar (cuando ya no lo necesites)</span>
+<span class="sk">sudo</span> ./svc.sh stop
+<span class="sk">sudo</span> ./svc.sh uninstall</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="2">03</div>
+              <div class="step-content">
+                <div class="step-title">Usar el runner en el workflow con labels</div>
+                <div class="step-desc">Cambia <ic>runs-on: ubuntu-latest</ic> por tus labels. Puedes mezclar: algunos jobs en GitHub (ubuntu-latest) y otros en tu máquina (self-hosted).</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">.github/workflows/ci.yml (usar self-hosted)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">jobs</span>:
+  <span class="sm"># Este job corre en TU máquina (sin gastar minutos)</span>
+  <span class="sc">build-push</span>:
+    <span class="sk">runs-on</span>: [self-hosted, linux, local]
+    <span class="sk">steps</span>:
+      <span class="sm"># Los steps normales funcionan igual</span>
+      - <span class="sk">uses</span>: actions/checkout@v4
+      - <span class="sk">run</span>: docker build -t myapp .
+
+  <span class="sm"># Este job en runners de GitHub (para no saturar tu máquina)</span>
+  <span class="sc">lint</span>:
+    <span class="sk">runs-on</span>: ubuntu-latest
+    <span class="sk">steps</span>:
+      - <span class="sk">uses</span>: actions/checkout@v4
+      - <span class="sk">run</span>: npm run lint</div>
+                </div>
+              </div>
+            </div>
+            <div class="warn-box">⚠️ <strong>Seguridad importante:</strong> nunca uses self-hosted runners en repos públicos sin restricciones. Cualquier PR podría ejecutar código en tu máquina. Para repos públicos, usa runners efímeros en contenedores Docker.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.4 -->
+      <div class="howto-card" data-week="2">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">2.4</span>
+          <span class="howto-trigger-title">Seguridad en CI: Trivy + Gitleaks + SBOM</span>
+          <span class="howto-trigger-sub">Trivy · Gitleaks · Supply Chain · SBOM</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="2">
+          <p class="howto-intro">La seguridad en el pipeline (DevSecOps) no es opcional en entornos corporativos. Aquí integramos tres herramientas clave: Trivy para vulnerabilidades, Gitleaks para secretos y SBOM para trazabilidad.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="2">01</div>
+              <div class="step-content">
+                <div class="step-title">Job de security scan con Trivy</div>
+                <div class="step-desc">Trivy escanea tanto el filesystem (dependencias) como la imagen Docker final. Si encuentra CVEs críticos, el pipeline falla.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">.github/workflows/ci.yml (job security)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+  <span class="sc">security</span>:
+    <span class="sk">runs-on</span>: ubuntu-latest
+    <span class="sk">steps</span>:
+      - <span class="sk">uses</span>: actions/checkout@v4
+
+      <span class="sm"># Scan de dependencias y código</span>
+      - <span class="sk">name</span>: Trivy filesystem scan
+        <span class="sk">uses</span>: aquasecurity/trivy-action@master
+        <span class="sk">with</span>:
+          <span class="sk">scan-type</span>: <span class="ss">'fs'</span>
+          <span class="sk">scan-ref</span>: <span class="ss">'.'</span>
+          <span class="sk">scanners</span>: <span class="ss">'vuln,secret,misconfig'</span>
+          <span class="sk">severity</span>: <span class="ss">'CRITICAL,HIGH'</span>
+          <span class="sk">exit-code</span>: <span class="ss">'1'</span>    <span class="sm"># Falla si encuentra algo</span>
+
+      <span class="sm"># Scan de secretos con Gitleaks</span>
+      - <span class="sk">name</span>: Gitleaks secret scan
+        <span class="sk">uses</span>: gitleaks/gitleaks-action@v2
+        <span class="sk">env</span>:
+          <span class="sv">GITHUB_TOKEN</span>: <span class="ss">${{ secrets.GITHUB_TOKEN }}</span>
+
+      <span class="sm"># Generar SBOM (Software Bill of Materials)</span>
+      - <span class="sk">name</span>: Generate SBOM
+        <span class="sk">uses</span>: anchore/sbom-action@v0
+        <span class="sk">with</span>:
+          <span class="sk">image</span>: ghcr.io/<span class="ss">${{ github.repository }}:sha-${{ github.sha }}</span>
+          <span class="sk">format</span>: spdx-json
+          <span class="sk">output-file</span>: sbom.spdx.json
+
+      - <span class="sk">name</span>: Upload SBOM artifact
+        <span class="sk">uses</span>: actions/upload-artifact@v4
+        <span class="sk">with</span>:
+          <span class="sk">name</span>: sbom
+          <span class="sk">path</span>: sbom.spdx.json</div>
+                </div>
+              </div>
+            </div>
+            <div class="ok-box">✅ <strong>Pro tip entrevistas:</strong> el SBOM (Software Bill of Materials) es un inventario de todos los componentes de tu software. En entornos enterprise es obligatorio por regulaciones como la orden ejecutiva de ciberseguridad de EE.UU. (EO 14028). Saber qué es y cómo generarlo te diferencia.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.5 -->
+      <div class="howto-card" data-week="2">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">2.5</span>
+          <span class="howto-trigger-title">Trunk-Based Development y Conventional Commits</span>
+          <span class="howto-trigger-sub">Git Flow · Commits · Semantic Release · PR Templates</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="2">
+          <p class="howto-intro">La estrategia de branching afecta directamente la velocidad del equipo. Trunk-Based Development (TBD) es lo que usan Google, Meta y la mayoría de las empresas con entregas frecuentes. Conventional Commits + Semantic Release automatizan el versionado.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="2">01</div>
+              <div class="step-content">
+                <div class="step-title">Configurar Conventional Commits con commitlint</div>
+                <div class="step-desc">Conventional Commits es un estándar que permite generar CHANGELOGs y tags de versión automáticamente. El formato es: <ic>type(scope): descripción</ic>.</div>
+                <div class="step-code"><span class="sm"># Instalar commitlint y husky</span>
+<span class="sk">npm</span> install --save-dev @commitlint/cli @commitlint/config-conventional husky
+
+<span class="sm"># commitlint.config.js</span>
+<span class="sf">module</span>.exports = { extends: [<span class="ss">'@commitlint/config-conventional'</span>] }
+
+<span class="sm"># Activar husky</span>
+<span class="sk">npx</span> husky install
+<span class="sk">echo</span> <span class="ss">"npx --no -- commitlint --edit \$1"</span> &gt; .husky/commit-msg
+
+<span class="sm"># Ejemplos de commits válidos:</span>
+git commit -m <span class="ss">"feat(api): add user authentication endpoint"</span>
+git commit -m <span class="ss">"fix(db): correct connection pool timeout"</span>
+git commit -m <span class="ss">"chore(ci): update trivy action version"</span>
+git commit -m <span class="ss">"feat!: remove deprecated v1 API"</span>   <span class="sm"># BREAKING CHANGE</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="2">02</div>
+              <div class="step-content">
+                <div class="step-title">PR Template para revisiones de código</div>
+                <div class="step-desc">Un PR template guía al autor a incluir la información necesaria. GitHub lo carga automáticamente cuando creas un PR.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">.github/pull_request_template.md</span><span class="file-lang">markdown</span></div>
+                  <div class="file-body">
+<span class="sc">## ¿Qué hace este PR?</span>
+<span class="sm">Descripción breve del cambio y su motivación.</span>
+
+<span class="sc">## Tipo de cambio</span>
+- [ ] Bug fix (cambio que corrige un problema)
+- [ ] Nueva feature (cambio que agrega funcionalidad)
+- [ ] Breaking change (cambio que rompe compatibilidad)
+- [ ] Refactor / performance
+
+<span class="sc">## Checklist</span>
+- [ ] Tests pasan localmente (<span class="ss">`npm test`</span>)
+- [ ] Lint pasa (<span class="ss">`npm run lint`</span>)
+- [ ] Documentación actualizada si aplica
+- [ ] No hay secretos hardcodeados
+- [ ] La imagen Docker buildea sin errores
+
+<span class="sc">## Screenshots / evidencia</span>
+<span class="sm">(si aplica)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section" data-week="2">
+    <div class="section-title">Reto Final — Semana 2</div>
+    <div class="challenge-card" data-week="2">
+      <div class="challenge-label">🏆 Challenge · Semana 2</div>
+      <div class="challenge-title">Pipeline CI/CD completo en &lt; 5 minutos</div>
+      <div class="challenge-desc">Configura un workflow que en cada push a <ic>main</ic> ejecute el pipeline completo y publique la imagen en GHCR.io usando tu self-hosted runner.</div>
+      <div class="deliverables">
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Pipeline con 3 jobs en paralelo: <strong>lint</strong>, <strong>test</strong> y <strong>security-scan</strong></span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Job <strong>build-push</strong> depende de los 3 anteriores y publica imagen a GHCR.io</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Imagen taggeada con <ic>sha-{commit}</ic> y <ic>latest</ic></span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Self-hosted runner ejecutando los jobs con label <ic>self-hosted</ic></span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Badge de CI en el README.md con status del último build</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>BONUS: Trivy falla el build si hay vulnerabilidades CRITICAL</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB 3: SEMANA 3 ══ -->
+<div class="tab-panel" id="tab-3">
+  <div class="week-hero" data-week="3">
+    <div>
+      <div class="week-tag">Semana 03</div>
+      <div class="week-title">IaC con OpenTofu & Kubernetes Local</div>
+      <div class="week-desc">Infraestructura como código con OpenTofu. Kubernetes local con Kind, Helm charts propios y GitOps completo con ArgoCD.</div>
+      <div class="tools-row">
+        <span class="tool-chip">OpenTofu</span><span class="tool-chip">Kind</span><span class="tool-chip">kubectl</span><span class="tool-chip">Helm</span><span class="tool-chip">ArgoCD</span><span class="tool-chip">LocalStack</span>
+      </div>
+    </div>
+    <div class="week-number">03</div>
+  </div>
+
+  <div class="howto-section" data-week="3">
+    <div class="section-title">How-To Guides — Semana 3</div>
+    <div class="howto-grid">
+
+      <!-- 3.1 -->
+      <div class="howto-card" data-week="3">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">3.1</span>
+          <span class="howto-trigger-title">OpenTofu: Tu Primera Infraestructura como Código</span>
+          <span class="howto-trigger-sub">Providers · Resources · State · Backend S3</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="3">
+          <p class="howto-intro">OpenTofu es el fork open-source de Terraform. La infraestructura como código elimina el "click en consola" y hace todo reproducible y auditable. El state es el corazón: registra qué recursos existen en la realidad.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="3">01</div>
+              <div class="step-content">
+                <div class="step-title">Instalar OpenTofu y estructura del proyecto IaC</div>
+                <div class="step-desc">Instala tofu y organiza el proyecto con módulos separados por componente. Esta estructura escala bien en equipos.</div>
+                <div class="step-code"><span class="sm"># macOS</span>
+<span class="sk">brew</span> install opentofu
+<span class="sm"># Linux</span>
+<span class="sk">curl</span> -Lo /tmp/tofu.tar.gz https://github.com/opentofu/opentofu/releases/latest/download/tofu_linux_amd64.tar.gz
+<span class="sk">sudo</span> tar -xzf /tmp/tofu.tar.gz -C /usr/local/bin tofu
+<span class="sk">tofu</span> version
+
+<span class="sm"># Estructura de módulos</span>
+<span class="sc">infra/terraform/</span>
+<span class="sc">├── main.tf</span>         <span class="sm"># Módulos de entrada</span>
+<span class="sc">├── variables.tf</span>
+<span class="sc">├── outputs.tf</span>
+<span class="sc">├── backend.tf</span>      <span class="sm"># Config del state remoto</span>
+<span class="sc">├── envs/</span>
+<span class="sc">│   ├── local.tfvars</span>
+<span class="sc">│   └── prod.tfvars</span>
+<span class="sc">└── modules/</span>
+<span class="sc">    ├── k8s-namespace/</span>
+<span class="sc">    └── aws-ecr/</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">02</div>
+              <div class="step-content">
+                <div class="step-title">Definir recursos de Kubernetes con el provider k8s</div>
+                <div class="step-desc">OpenTofu puede crear namespaces, RBAC y ConfigMaps en Kubernetes igual que crea recursos en AWS. El provider lee el kubeconfig automáticamente.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/terraform/main.tf</span><span class="file-lang">hcl</span></div>
+                  <div class="file-body">
+<span class="sk">terraform</span> {
+  <span class="sk">required_providers</span> {
+    <span class="sc">kubernetes</span> = {
+      <span class="sk">source</span>  = <span class="ss">"hashicorp/kubernetes"</span>
+      <span class="sk">version</span> = <span class="ss">"~> 2.27"</span>
+    }
+  }
+  <span class="sk">backend</span> <span class="ss">"s3"</span> {}   <span class="sm"># Config en backend.tf</span>
+}
+
+<span class="sk">provider</span> <span class="ss">"kubernetes"</span> {
+  <span class="sk">config_path</span>    = <span class="ss">"~/.kube/config"</span>
+  <span class="sk">config_context</span> = <span class="ss">"kind-mvp-cluster"</span>
+}
+
+<span class="sk">resource</span> <span class="ss">"kubernetes_namespace"</span> <span class="ss">"production"</span> {
+  <span class="sk">metadata</span> {
+    <span class="sk">name</span> = <span class="ss">"production"</span>
+    <span class="sk">labels</span> = {
+      <span class="sc">env</span>        = <span class="ss">"production"</span>
+      <span class="sc">managed-by</span> = <span class="ss">"opentofu"</span>
+    }
+  }
+}
+
+<span class="sk">resource</span> <span class="ss">"kubernetes_config_map"</span> <span class="ss">"app_config"</span> {
+  <span class="sk">metadata</span> {
+    <span class="sk">name</span>      = <span class="ss">"app-config"</span>
+    <span class="sk">namespace</span> = kubernetes_namespace.production.metadata[0].name
+  }
+  <span class="sk">data</span> = {
+    <span class="sc">LOG_LEVEL</span>  = <span class="ss">"info"</span>
+    <span class="sc">API_PORT</span>   = <span class="ss">"3000"</span>
+  }
+}</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">03</div>
+              <div class="step-content">
+                <div class="step-title">Backend remoto con S3 de LocalStack</div>
+                <div class="step-desc">El state de Terraform/OpenTofu debe estar en un backend remoto para trabajo en equipo. Usamos LocalStack para simularlo gratis.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/terraform/backend.tf</span><span class="file-lang">hcl</span></div>
+                  <div class="file-body">
+<span class="sk">terraform</span> {
+  <span class="sk">backend</span> <span class="ss">"s3"</span> {
+    <span class="sk">bucket</span>                      = <span class="ss">"terraform-state"</span>
+    <span class="sk">key</span>                         = <span class="ss">"mvp/terraform.tfstate"</span>
+    <span class="sk">region</span>                      = <span class="ss">"us-east-1"</span>
+    <span class="sm"># Para LocalStack:</span>
+    <span class="sk">endpoint</span>                    = <span class="ss">"http://localhost:4566"</span>
+    <span class="sk">access_key</span>                  = <span class="ss">"test"</span>
+    <span class="sk">secret_key</span>                  = <span class="ss">"test"</span>
+    <span class="sk">skip_credentials_validation</span> = <span class="sc">true</span>
+    <span class="sk">skip_metadata_api_check</span>     = <span class="sc">true</span>
+    <span class="sk">skip_requesting_account_id</span>  = <span class="sc">true</span>
+    <span class="sk">force_path_style</span>            = <span class="sc">true</span>
+  }
+}</div>
+                </div>
+                <div class="step-code" style="margin-top:10px"><span class="sm"># Crear el bucket en LocalStack primero</span>
+<span class="sk">aws</span> --endpoint-url=http://localhost:4566 \
+  s3 mb s3://terraform-state
+
+<span class="sm"># Inicializar y aplicar</span>
+<span class="sk">tofu</span> init
+<span class="sk">tofu</span> plan -var-file=envs/local.tfvars -out=tfplan
+<span class="sk">tofu</span> apply tfplan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.2 -->
+      <div class="howto-card" data-week="3">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">3.2</span>
+          <span class="howto-trigger-title">Cluster Kubernetes Local con Kind</span>
+          <span class="howto-trigger-sub">Kind · kubectl · Multi-node · Ingress · Probes</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="3">
+          <p class="howto-intro">Kind (Kubernetes in Docker) corre nodos de K8s como contenedores. Es la forma más rápida de tener un cluster local con múltiples nodos para practicar scheduling, affinity y otros conceptos avanzados.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="3">01</div>
+              <div class="step-content">
+                <div class="step-title">Crear cluster multi-nodo con Kind</div>
+                <div class="step-desc">La config de Kind en YAML permite definir cuántos nodos, qué puertos exponer y montar directorios del host.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/k8s/kind-config.yaml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">kind</span>: Cluster
+<span class="sk">apiVersion</span>: kind.x-k8s.io/v1alpha4
+<span class="sk">name</span>: mvp-cluster
+<span class="sk">nodes</span>:
+  - <span class="sk">role</span>: control-plane
+    <span class="sk">kubeadmConfigPatches</span>:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: <span class="ss">"ingress-ready=true"</span>
+    <span class="sk">extraPortMappings</span>:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+  - <span class="sk">role</span>: worker
+  - <span class="sk">role</span>: worker</div>
+                </div>
+                <div class="step-code" style="margin-top:10px"><span class="sm"># Crear el cluster</span>
+<span class="sk">kind</span> create cluster --config infra/k8s/kind-config.yaml
+<span class="sk">kubectl</span> get nodes -o wide
+
+<span class="sm"># Instalar NGINX Ingress Controller para Kind</span>
+<span class="sk">kubectl</span> apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+<span class="sk">kubectl</span> wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">02</div>
+              <div class="step-content">
+                <div class="step-title">Deployment completo con Probes y Resource Limits</div>
+                <div class="step-desc">Un Deployment de producción siempre tiene liveness/readiness probes para que K8s sepa cuándo un pod está sano, y resource limits para evitar que un pod consuma todo el nodo.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/k8s/manifests/deployment.yaml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">apiVersion</span>: apps/v1
+<span class="sk">kind</span>: Deployment
+<span class="sk">metadata</span>:
+  <span class="sk">name</span>: api
+  <span class="sk">namespace</span>: production
+<span class="sk">spec</span>:
+  <span class="sk">replicas</span>: 2
+  <span class="sk">strategy</span>:
+    <span class="sk">type</span>: RollingUpdate
+    <span class="sk">rollingUpdate</span>: { maxSurge: 1, maxUnavailable: 0 }
+  <span class="sk">selector</span>:
+    <span class="sk">matchLabels</span>: { app: api }
+  <span class="sk">template</span>:
+    <span class="sk">metadata</span>:
+      <span class="sk">labels</span>: { app: api }
+    <span class="sk">spec</span>:
+      <span class="sk">containers</span>:
+        - <span class="sk">name</span>: api
+          <span class="sk">image</span>: ghcr.io/user/myapp:latest
+          <span class="sk">ports</span>: [{ containerPort: 3000 }]
+          <span class="sk">envFrom</span>:
+            - <span class="sk">configMapRef</span>: { name: app-config }
+            - <span class="sk">secretRef</span>: { name: app-secrets }
+          <span class="sk">resources</span>:
+            <span class="sk">requests</span>: { cpu: 100m, memory: 128Mi }
+            <span class="sk">limits</span>:   { cpu: 500m, memory: 512Mi }
+          <span class="sk">livenessProbe</span>:
+            <span class="sk">httpGet</span>: { path: /health, port: 3000 }
+            <span class="sk">initialDelaySeconds</span>: 15
+            <span class="sk">periodSeconds</span>: 10
+          <span class="sk">readinessProbe</span>:
+            <span class="sk">httpGet</span>: { path: /ready, port: 3000 }
+            <span class="sk">initialDelaySeconds</span>: 5
+            <span class="sk">periodSeconds</span>: 5</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.3 -->
+      <div class="howto-card" data-week="3">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">3.3</span>
+          <span class="howto-trigger-title">Crear tu Primer Helm Chart desde Cero</span>
+          <span class="howto-trigger-sub">Helm · Templates · Values · Hooks</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="3">
+          <p class="howto-intro">Helm empaqueta manifiestos de Kubernetes en charts reutilizables. En lugar de tener 5 archivos YAML casi idénticos para dev/staging/prod, tienes un template con variables por ambiente.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="3">01</div>
+              <div class="step-content">
+                <div class="step-title">Scaffold y estructura del chart</div>
+                <div class="step-desc"><ic>helm create</ic> genera la estructura. Limpia los templates de ejemplo y empieza con los tuyos propios.</div>
+                <div class="step-code"><span class="sm"># Crear el chart</span>
+<span class="sk">helm</span> create infra/k8s/helm/myapp-chart
+
+<span class="sm"># Estructura generada:</span>
+<span class="sc">myapp-chart/</span>
+<span class="sc">├── Chart.yaml</span>         <span class="sm"># Metadata del chart</span>
+<span class="sc">├── values.yaml</span>        <span class="sm"># Valores por defecto</span>
+<span class="sc">├── values.prod.yaml</span>   <span class="sm"># Override para producción</span>
+<span class="sc">└── templates/</span>
+<span class="sc">    ├── deployment.yaml</span>
+<span class="sc">    ├── service.yaml</span>
+<span class="sc">    ├── ingress.yaml</span>
+<span class="sc">    ├── hpa.yaml</span>
+<span class="sc">    └── _helpers.tpl</span>   <span class="sm"># Funciones reutilizables</span>
+
+<span class="sm"># Renderizar el chart localmente (sin aplicar)</span>
+<span class="sk">helm</span> template myapp ./myapp-chart -f values.prod.yaml
+
+<span class="sm"># Verificar sintaxis</span>
+<span class="sk">helm</span> lint ./myapp-chart</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">02</div>
+              <div class="step-content">
+                <div class="step-title">values.yaml y override por ambiente</div>
+                <div class="step-desc">Los values definen la interfaz del chart. El operator/desarrollador solo necesita conocer los values, no los templates internos.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">myapp-chart/values.yaml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sc">image</span>:
+  <span class="sk">repository</span>: ghcr.io/user/myapp
+  <span class="sk">tag</span>: latest
+  <span class="sk">pullPolicy</span>: IfNotPresent
+
+<span class="sc">replicas</span>: 1
+
+<span class="sc">resources</span>:
+  <span class="sk">requests</span>: { cpu: 100m, memory: 128Mi }
+  <span class="sk">limits</span>:   { cpu: 500m, memory: 512Mi }
+
+<span class="sc">ingress</span>:
+  <span class="sk">enabled</span>: false
+  <span class="sk">host</span>: api.local
+
+<span class="sc">hpa</span>:
+  <span class="sk">enabled</span>: false
+  <span class="sk">minReplicas</span>: 1
+  <span class="sk">maxReplicas</span>: 5
+  <span class="sk">cpuThreshold</span>: 70</div>
+                </div>
+                <div class="file-block" style="margin-top:10px">
+                  <div class="file-header"><span class="file-name">myapp-chart/values.prod.yaml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sm"># Override para producción</span>
+<span class="sc">replicas</span>: 3
+<span class="sc">image</span>:
+  <span class="sk">tag</span>: <span class="ss">"sha-abc1234"</span>   <span class="sm"># SHA específico, no "latest"</span>
+<span class="sc">ingress</span>:
+  <span class="sk">enabled</span>: true
+  <span class="sk">host</span>: api.midominio.com
+<span class="sc">hpa</span>:
+  <span class="sk">enabled</span>: true</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">03</div>
+              <div class="step-content">
+                <div class="step-title">Deploy con helm upgrade --install</div>
+                <div class="step-desc"><ic>upgrade --install</ic> hace install si no existe y upgrade si ya está. Es el comando idempotente que usarás en CI.</div>
+                <div class="step-code"><span class="sm"># Deploy a producción</span>
+<span class="sk">helm</span> upgrade --install myapp ./myapp-chart \
+  --namespace production --create-namespace \
+  -f values.prod.yaml \
+  --set image.tag=sha-$(git rev-parse --short HEAD) \
+  --atomic \          <span class="sm"># Rollback automático si falla</span>
+  --timeout 5m
+
+<span class="sm"># Ver historial de releases</span>
+<span class="sk">helm</span> history myapp -n production
+
+<span class="sm"># Rollback al release anterior</span>
+<span class="sk">helm</span> rollback myapp 1 -n production</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.4 -->
+      <div class="howto-card" data-week="3">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">3.4</span>
+          <span class="howto-trigger-title">GitOps con ArgoCD: Git como Fuente de Verdad</span>
+          <span class="howto-trigger-sub">ArgoCD · Auto-sync · Self-heal · Image Updater</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="3">
+          <p class="howto-intro">GitOps significa que el estado del cluster siempre refleja lo que está en Git. ArgoCD observa el repo y si hay diferencia entre Git y el cluster, la corrige automáticamente. Nunca más <ic>kubectl apply</ic> manual en producción.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="3">01</div>
+              <div class="step-content">
+                <div class="step-title">Instalar ArgoCD en el cluster Kind</div>
+                <div class="step-desc">ArgoCD se instala en su propio namespace. El server expone una UI web y una CLI.</div>
+                <div class="step-code"><span class="sm"># Instalar ArgoCD</span>
+<span class="sk">kubectl</span> create namespace argocd
+<span class="sk">kubectl</span> apply -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+<span class="sm"># Esperar a que los pods estén listos</span>
+<span class="sk">kubectl</span> wait --for=condition=available deployment \
+  --all -n argocd --timeout=300s
+
+<span class="sm"># Port-forward para acceder a la UI</span>
+<span class="sk">kubectl</span> port-forward svc/argocd-server -n argocd 8080:443 &amp;
+
+<span class="sm"># Password inicial del admin</span>
+<span class="sk">kubectl</span> -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">02</div>
+              <div class="step-content">
+                <div class="step-title">Crear una Application con auto-sync y self-heal</div>
+                <div class="step-desc">La Application CRD le dice a ArgoCD qué repo observar, qué path del repo es el chart, y con qué política sincronizar.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/k8s/argocd/application.yaml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">apiVersion</span>: argoproj.io/v1alpha1
+<span class="sk">kind</span>: Application
+<span class="sk">metadata</span>:
+  <span class="sk">name</span>: myapp
+  <span class="sk">namespace</span>: argocd
+<span class="sk">spec</span>:
+  <span class="sk">project</span>: default
+  <span class="sk">source</span>:
+    <span class="sk">repoURL</span>: https://github.com/user/mvp-devops.git
+    <span class="sk">targetRevision</span>: main
+    <span class="sk">path</span>: infra/k8s/helm/myapp-chart
+    <span class="sk">helm</span>:
+      <span class="sk">valueFiles</span>: [values.prod.yaml]
+  <span class="sk">destination</span>:
+    <span class="sk">server</span>: https://kubernetes.default.svc
+    <span class="sk">namespace</span>: production
+  <span class="sk">syncPolicy</span>:
+    <span class="sk">automated</span>:
+      <span class="sk">prune</span>: <span class="sc">true</span>      <span class="sm"># Elimina recursos que ya no están en Git</span>
+      <span class="sk">selfHeal</span>: <span class="sc">true</span>   <span class="sm"># Corrige cambios manuales en el cluster</span>
+    <span class="sk">syncOptions</span>:
+      - CreateNamespace=true</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="3">03</div>
+              <div class="step-content">
+                <div class="step-title">Verificar el estado de sync con ArgoCD CLI</div>
+                <div class="step-desc">La CLI de ArgoCD permite ver el estado, hacer sync manual y rollback desde la terminal.</div>
+                <div class="step-code"><span class="sm"># Login a ArgoCD</span>
+<span class="sk">argocd</span> login localhost:8080 --username admin --password PASSWORD --insecure
+
+<span class="sm"># Ver todas las applications</span>
+<span class="sk">argocd</span> app list
+
+<span class="sm"># Ver estado detallado</span>
+<span class="sk">argocd</span> app get myapp
+
+<span class="sm"># Sync manual (útil para forzar)</span>
+<span class="sk">argocd</span> app sync myapp --prune
+
+<span class="sm"># Ver historial de deploys</span>
+<span class="sk">argocd</span> app history myapp
+
+<span class="sm"># Rollback al deploy anterior</span>
+<span class="sk">argocd</span> app rollback myapp</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section" data-week="3">
+    <div class="section-title">Reto Final — Semana 3</div>
+    <div class="challenge-card" data-week="3">
+      <div class="challenge-label">🏆 Challenge · Semana 3</div>
+      <div class="challenge-title">GitOps automático: push → producción en Kind</div>
+      <div class="challenge-desc">Un <ic>git push</ic> dispara el CI, publica imagen, actualiza el chart y ArgoCD despliega automáticamente en Kind sin intervención manual.</div>
+      <div class="deliverables">
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Cluster Kind con 1 control-plane + 2 workers definido en YAML</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Helm chart propio con Deployment, Service, Ingress y HPA</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>ArgoCD con auto-sync y self-heal activados</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>OpenTofu provisiona namespace, RBAC y ConfigMaps en K8s</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>State de OpenTofu guardado en bucket S3 de LocalStack</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>BONUS: Canary deployment con 20% de tráfico a la nueva versión</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB 4: SEMANA 4 ══ -->
+<div class="tab-panel" id="tab-4">
+  <div class="week-hero" data-week="4">
+    <div>
+      <div class="week-tag">Semana 04</div>
+      <div class="week-title">Monitoreo & Migración Low-Cost a AWS</div>
+      <div class="week-desc">Observabilidad completa con Prometheus y Grafana. SLOs, alertas inteligentes y guía de migración al cloud usando exclusivamente el AWS Free Tier.</div>
+      <div class="tools-row">
+        <span class="tool-chip">Prometheus</span><span class="tool-chip">Grafana</span><span class="tool-chip">AlertManager</span><span class="tool-chip">Loki</span><span class="tool-chip">AWS Lambda</span><span class="tool-chip">Oracle Cloud</span>
+      </div>
+    </div>
+    <div class="week-number">04</div>
+  </div>
+
+  <div class="howto-section" data-week="4">
+    <div class="section-title">How-To Guides — Semana 4</div>
+    <div class="howto-grid">
+
+      <!-- 4.1 -->
+      <div class="howto-card" data-week="4">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">4.1</span>
+          <span class="howto-trigger-title">Prometheus: Instrumentar y Scrapar la API</span>
+          <span class="howto-trigger-sub">Métricas · PromQL · client_node · scrape_config</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="4">
+          <p class="howto-intro">Prometheus recolecta métricas haciendo HTTP GET al endpoint <ic>/metrics</ic> de tu app (pull model). La instrumentación es el acto de agregar ese endpoint a tu código con las métricas que te importan.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="4">01</div>
+              <div class="step-content">
+                <div class="step-title">Instrumentar la API Node.js con prom-client</div>
+                <div class="step-desc">prom-client es la librería oficial de Prometheus para Node.js. Expone métricas default del proceso (CPU, memoria, GC) más las que tú definas.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">app/src/metrics.ts</span><span class="file-lang">typescript</span></div>
+                  <div class="file-body">
+<span class="sk">import</span> { register, collectDefaultMetrics, Counter, Histogram } from <span class="ss">'prom-client'</span>;
+
+<span class="sm">// Métricas default: CPU, memoria, event loop lag, etc.</span>
+collectDefaultMetrics({ register });
+
+<span class="sm">// Counter: solo sube (requests totales)</span>
+<span class="sf">export const</span> httpRequestsTotal = <span class="sk">new</span> Counter({
+  name: <span class="ss">'http_requests_total'</span>,
+  help: <span class="ss">'Total de requests HTTP'</span>,
+  labelNames: [<span class="ss">'method'</span>, <span class="ss">'route'</span>, <span class="ss">'status'</span>],
+});
+
+<span class="sm">// Histogram: distribución de latencias</span>
+<span class="sf">export const</span> httpDurationSeconds = <span class="sk">new</span> Histogram({
+  name: <span class="ss">'http_duration_seconds'</span>,
+  help: <span class="ss">'Duración de requests HTTP en segundos'</span>,
+  labelNames: [<span class="ss">'method'</span>, <span class="ss">'route'</span>],
+  buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+});
+
+<span class="sm">// Endpoint /metrics para Prometheus</span>
+<span class="sf">export async function</span> metricsHandler(req, res) {
+  res.set(<span class="ss">'Content-Type'</span>, register.contentType);
+  res.end(<span class="sk">await</span> register.metrics());
+}
+
+<span class="sm">// Middleware para auto-instrumentar rutas</span>
+<span class="sf">export function</span> metricsMiddleware(req, res, next) {
+  <span class="sf">const</span> end = httpDurationSeconds.startTimer({ method: req.method, route: req.path });
+  res.on(<span class="ss">'finish'</span>, () =&gt; {
+    httpRequestsTotal.inc({ method: req.method, route: req.path, status: res.statusCode });
+    end();
+  });
+  next();
+}</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">02</div>
+              <div class="step-content">
+                <div class="step-title">Configurar Prometheus para scrapear la API</div>
+                <div class="step-desc">El archivo prometheus.yml define qué targets scrapear y con qué frecuencia. Cuando la app corre en Docker Compose, el target es el nombre del servicio.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/monitoring/prometheus.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">global</span>:
+  <span class="sk">scrape_interval</span>: 15s
+  <span class="sk">evaluation_interval</span>: 15s
+
+<span class="sk">rule_files</span>:
+  - <span class="ss">"alerts.yml"</span>
+
+<span class="sk">alerting</span>:
+  <span class="sk">alertmanagers</span>:
+    - <span class="sk">static_configs</span>:
+        - <span class="sk">targets</span>: [<span class="ss">"alertmanager:9093"</span>]
+
+<span class="sk">scrape_configs</span>:
+  - <span class="sk">job_name</span>: <span class="ss">'api'</span>
+    <span class="sk">static_configs</span>:
+      - <span class="sk">targets</span>: [<span class="ss">'api:3000'</span>]
+    <span class="sk">metrics_path</span>: /metrics
+    <span class="sk">scrape_interval</span>: 10s
+
+  - <span class="sk">job_name</span>: <span class="ss">'postgres'</span>
+    <span class="sk">static_configs</span>:
+      - <span class="sk">targets</span>: [<span class="ss">'postgres-exporter:9187'</span>]
+
+  - <span class="sk">job_name</span>: <span class="ss">'node-exporter'</span>  <span class="sm"># Métricas del host</span>
+    <span class="sk">static_configs</span>:
+      - <span class="sk">targets</span>: [<span class="ss">'node-exporter:9100'</span>]</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">03</div>
+              <div class="step-content">
+                <div class="step-title">Queries PromQL esenciales para el dashboard</div>
+                <div class="step-desc">PromQL es el lenguaje de consulta de Prometheus. Estas son las queries que usarás en el 90% de los dashboards de APIs.</div>
+                <div class="step-code"><span class="sm"># Requests por segundo (tasa en 5 min)</span>
+rate(http_requests_total[5m])
+
+<span class="sm"># Error rate (%) en los últimos 5 min</span>
+sum(rate(http_requests_total{status=~"5.."}[5m]))
+/ sum(rate(http_requests_total[5m])) * 100
+
+<span class="sm"># Latencia P50, P95, P99</span>
+histogram_quantile(0.50, rate(http_duration_seconds_bucket[5m]))
+histogram_quantile(0.95, rate(http_duration_seconds_bucket[5m]))
+histogram_quantile(0.99, rate(http_duration_seconds_bucket[5m]))
+
+<span class="sm"># Latencia promedio</span>
+rate(http_duration_seconds_sum[5m])
+/ rate(http_duration_seconds_count[5m])
+
+<span class="sm"># Uso de CPU del proceso Node.js</span>
+rate(process_cpu_seconds_total[5m]) * 100</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.2 -->
+      <div class="howto-card" data-week="4">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">4.2</span>
+          <span class="howto-trigger-title">Grafana: Dashboard RED Method como Código</span>
+          <span class="howto-trigger-sub">Datasources · Provisioning · RED · Variables</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="4">
+          <p class="howto-intro">El RED Method (Rate, Errors, Duration) es el framework de métricas más usado para APIs y microservicios. Dashboard as Code con provisioning significa que el dashboard vive en Git y se despliega automáticamente.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="4">01</div>
+              <div class="step-content">
+                <div class="step-title">Grafana con provisioning automático de datasources</div>
+                <div class="step-desc">En lugar de configurar Grafana manualmente por la UI, define los datasources en YAML. Se aplican automáticamente al iniciar el contenedor.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/monitoring/grafana/provisioning/datasources/prometheus.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">apiVersion</span>: 1
+<span class="sk">datasources</span>:
+  - <span class="sk">name</span>: Prometheus
+    <span class="sk">type</span>: prometheus
+    <span class="sk">access</span>: proxy
+    <span class="sk">url</span>: http://prometheus:9090
+    <span class="sk">isDefault</span>: <span class="sc">true</span>
+    <span class="sk">jsonData</span>:
+      <span class="sk">timeInterval</span>: <span class="ss">"15s"</span>
+
+  - <span class="sk">name</span>: Loki
+    <span class="sk">type</span>: loki
+    <span class="sk">access</span>: proxy
+    <span class="sk">url</span>: http://loki:3100</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">02</div>
+              <div class="step-content">
+                <div class="step-title">Stack completo de monitoreo en Docker Compose</div>
+                <div class="step-desc">Prometheus, Grafana, AlertManager y Loki corriendo juntos. Este es el stack de observabilidad que verás en la mayoría de las empresas.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">docker-compose.yml (servicios de monitoreo)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sc">prometheus</span>:
+  <span class="sk">image</span>: prom/prometheus:latest
+  <span class="sk">volumes</span>:
+    - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - ./infra/monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+    - prometheus_data:/prometheus
+  <span class="sk">command</span>: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.retention.time=15d
+  <span class="sk">ports</span>: [<span class="ss">"9090:9090"</span>]
+  <span class="sk">networks</span>: [app-net]
+
+<span class="sc">grafana</span>:
+  <span class="sk">image</span>: grafana/grafana:latest
+  <span class="sk">environment</span>:
+    <span class="sv">GF_SECURITY_ADMIN_PASSWORD</span>: admin
+    <span class="sv">GF_USERS_ALLOW_SIGN_UP</span>: <span class="ss">"false"</span>
+  <span class="sk">volumes</span>:
+    - grafana_data:/var/lib/grafana
+    - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+  <span class="sk">ports</span>: [<span class="ss">"3001:3000"</span>]
+  <span class="sk">depends_on</span>: [prometheus]
+  <span class="sk">networks</span>: [app-net]
+
+<span class="sc">alertmanager</span>:
+  <span class="sk">image</span>: prom/alertmanager:latest
+  <span class="sk">volumes</span>:
+    - ./infra/monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+  <span class="sk">ports</span>: [<span class="ss">"9093:9093"</span>]
+  <span class="sk">networks</span>: [app-net]
+
+<span class="sc">loki</span>:
+  <span class="sk">image</span>: grafana/loki:latest
+  <span class="sk">command</span>: -config.file=/etc/loki/loki-config.yaml
+  <span class="sk">ports</span>: [<span class="ss">"3100:3100"</span>]
+  <span class="sk">networks</span>: [app-net]</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.3 -->
+      <div class="howto-card" data-week="4">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">4.3</span>
+          <span class="howto-trigger-title">Alertas con AlertManager + Slack Notifications</span>
+          <span class="howto-trigger-sub">Alert Rules · SLOs · Routing · Slack · Runbooks</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="4">
+          <p class="howto-intro">Las alertas bien configuradas son la diferencia entre enterarte de un problema por un cliente o antes de que él lo sepa. Aquí configuramos alertas basadas en SLOs reales con notificaciones a Slack.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="4">01</div>
+              <div class="step-content">
+                <div class="step-title">Definir reglas de alerta en Prometheus</div>
+                <div class="step-desc">Las alertas se definen en archivos YAML que Prometheus evalúa periódicamente. Cuando una condición se cumple por cierto tiempo, la alerta se activa y se envía a AlertManager.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/monitoring/alerts.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">groups</span>:
+  - <span class="sk">name</span>: api.rules
+    <span class="sk">rules</span>:
+
+    <span class="sm"># Alerta si error rate &gt; 1% por 5 minutos</span>
+    - <span class="sk">alert</span>: HighErrorRate
+      <span class="sk">expr</span>: |
+        sum(rate(http_requests_total{status=~"5.."}[5m]))
+        / sum(rate(http_requests_total[5m])) * 100 &gt; 1
+      <span class="sk">for</span>: 5m
+      <span class="sk">labels</span>:
+        <span class="sc">severity</span>: critical
+      <span class="sk">annotations</span>:
+        <span class="sc">summary</span>: <span class="ss">"Error rate alto: {{ $value | printf \"%.2f\" }}%"</span>
+        <span class="sc">description</span>: <span class="ss">"La API tiene un error rate de {{ $value }}% en los últimos 5 min"</span>
+        <span class="sc">runbook_url</span>: <span class="ss">"https://github.com/user/repo/wiki/runbook-high-error-rate"</span>
+
+    <span class="sm"># Alerta si P99 de latencia &gt; 1 segundo</span>
+    - <span class="sk">alert</span>: SlowAPIResponses
+      <span class="sk">expr</span>: |
+        histogram_quantile(0.99, rate(http_duration_seconds_bucket[5m])) &gt; 1
+      <span class="sk">for</span>: 3m
+      <span class="sk">labels</span>:
+        <span class="sc">severity</span>: warning
+      <span class="sk">annotations</span>:
+        <span class="sc">summary</span>: <span class="ss">"Latencia P99 alta: {{ $value | printf \"%.2f\" }}s"</span>
+
+    <span class="sm"># Alerta si la API está caída</span>
+    - <span class="sk">alert</span>: APIDown
+      <span class="sk">expr</span>: up{job="api"} == 0
+      <span class="sk">for</span>: 1m
+      <span class="sk">labels</span>:
+        <span class="sc">severity</span>: critical
+      <span class="sk">annotations</span>:
+        <span class="sc">summary</span>: <span class="ss">"API no responde a scraping de Prometheus"</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">02</div>
+              <div class="step-content">
+                <div class="step-title">Configurar AlertManager con routing a Slack</div>
+                <div class="step-desc">AlertManager agrupa alertas, las deduplica y las enruta al canal correcto según labels. Aquí enviamos critical a PagerDuty y warning a Slack.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/monitoring/alertmanager.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">global</span>:
+  <span class="sk">resolve_timeout</span>: 5m
+  <span class="sk">slack_api_url</span>: <span class="ss">'SLACK_WEBHOOK_URL'</span>
+
+<span class="sk">route</span>:
+  <span class="sk">group_by</span>: [<span class="ss">'alertname'</span>, <span class="ss">'severity'</span>]
+  <span class="sk">group_wait</span>: 30s
+  <span class="sk">group_interval</span>: 5m
+  <span class="sk">repeat_interval</span>: 12h
+  <span class="sk">receiver</span>: <span class="ss">'slack-warnings'</span>
+  <span class="sk">routes</span>:
+    - <span class="sk">match</span>: { severity: critical }
+      <span class="sk">receiver</span>: <span class="ss">'slack-critical'</span>
+
+<span class="sk">receivers</span>:
+  - <span class="sk">name</span>: <span class="ss">'slack-critical'</span>
+    <span class="sk">slack_configs</span>:
+      - <span class="sk">channel</span>: <span class="ss">'#alerts-critical'</span>
+        <span class="sk">icon_emoji</span>: <span class="ss">':fire:'</span>
+        <span class="sk">title</span>: <span class="ss">'🚨 CRITICAL: {{ .GroupLabels.alertname }}'</span>
+        <span class="sk">text</span>: <span class="ss">'{{ range .Alerts }}{{ .Annotations.description }}\nRunbook: {{ .Annotations.runbook_url }}{{ end }}'</span>
+        <span class="sk">send_resolved</span>: <span class="sc">true</span>
+
+  - <span class="sk">name</span>: <span class="ss">'slack-warnings'</span>
+    <span class="sk">slack_configs</span>:
+      - <span class="sk">channel</span>: <span class="ss">'#alerts-dev'</span>
+        <span class="sk">title</span>: <span class="ss">'⚠️ {{ .GroupLabels.alertname }}'</span>
+        <span class="sk">text</span>: <span class="ss">'{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.4 -->
+      <div class="howto-card" data-week="4">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">4.4</span>
+          <span class="howto-trigger-title">Migración Low-Cost a AWS Free Tier</span>
+          <span class="howto-trigger-sub">EC2 t3.micro · ECR · Lambda · Function URLs</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="4">
+          <p class="howto-intro">El Free Tier de AWS es suficiente para un MVP real si evitas los servicios caros (ALB cuesta ~$16/mes). La estrategia: EC2 t3.micro con Docker Compose para la app, Lambda para endpoints sin estado, y Function URLs en lugar de ALB.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="4">01</div>
+              <div class="step-content">
+                <div class="step-title">Crear ECR repository y hacer push de la imagen</div>
+                <div class="step-desc">ECR (Elastic Container Registry) es el equivalente a GHCR pero en AWS. El primer push requiere autenticarse con un token temporal de AWS.</div>
+                <div class="step-code"><span class="sm"># Crear repositorio en ECR</span>
+<span class="sk">aws</span> ecr create-repository \
+  --repository-name myapp \
+  --region us-east-1 \
+  --image-scanning-configuration scanOnPush=true
+
+<span class="sm"># Login a ECR (token válido por 12 horas)</span>
+<span class="sk">aws</span> ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin \
+  $(aws sts get-caller-identity --query Account --output text).dkr.ecr.us-east-1.amazonaws.com
+
+<span class="sm"># Tag y push</span>
+<span class="sk">export</span> ECR_URI=$(aws ecr describe-repositories \
+  --repository-names myapp \
+  --query 'repositories[0].repositoryUri' \
+  --output text)
+
+<span class="sk">docker</span> tag myapp:latest $ECR_URI:latest
+<span class="sk">docker</span> push $ECR_URI:latest</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">02</div>
+              <div class="step-content">
+                <div class="step-title">Desplegar en EC2 t3.micro con Docker Compose + SSH</div>
+                <div class="step-desc">El t3.micro tiene 2 vCPU y 1GB RAM. Suficiente para API + PostgreSQL en un MVP. GitHub Actions se conecta vía SSH y hace el pull + up.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">.github/workflows/deploy.yml (job deploy-ec2)</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+  <span class="sc">deploy</span>:
+    <span class="sk">needs</span>: build-push
+    <span class="sk">runs-on</span>: ubuntu-latest
+    <span class="sk">steps</span>:
+      - <span class="sk">name</span>: Deploy to EC2
+        <span class="sk">uses</span>: appleboy/ssh-action@v1
+        <span class="sk">with</span>:
+          <span class="sk">host</span>: <span class="ss">${{ secrets.EC2_HOST }}</span>
+          <span class="sk">username</span>: ubuntu
+          <span class="sk">key</span>: <span class="ss">${{ secrets.EC2_SSH_KEY }}</span>
+          <span class="sk">script</span>: |
+            <span class="sm"># Login a ECR desde EC2</span>
+            aws ecr get-login-password --region us-east-1 | \
+              docker login --username AWS --password-stdin \
+              $ECR_URI
+
+            <span class="sm"># Pull nueva imagen y restart</span>
+            docker compose -f /home/ubuntu/app/compose.prod.yml pull
+            docker compose -f /home/ubuntu/app/compose.prod.yml up -d
+
+            <span class="sm"># Limpiar imágenes viejas</span>
+            docker image prune -f</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">03</div>
+              <div class="step-content">
+                <div class="step-title">Lambda + Function URL como alternativa sin servidor (sin ALB)</div>
+                <div class="step-desc">Para APIs sin estado o con tráfico bajo, Lambda + Function URL es más barato que EC2 + ALB. El primer millón de requests es gratis permanentemente.</div>
+                <div class="step-code"><span class="sm"># Crear función Lambda desde imagen Docker</span>
+<span class="sk">aws</span> lambda create-function \
+  --function-name myapp-api \
+  --package-type Image \
+  --code ImageUri=$ECR_URI:latest \
+  --role arn:aws:iam::ACCOUNT:role/lambda-execution-role \
+  --timeout 30 \
+  --memory-size 512
+
+<span class="sm"># Agregar Function URL (sin ALB, gratis)</span>
+<span class="sk">aws</span> lambda create-function-url-config \
+  --function-name myapp-api \
+  --auth-type NONE    <span class="sm"># O AWS_IAM para protegerla</span>
+
+<span class="sm"># La URL resultante es algo como:</span>
+<span class="sm"># https://abc123.lambda-url.us-east-1.on.aws/</span>
+
+<span class="sm"># Actualizar imagen (para deploys posteriores)</span>
+<span class="sk">aws</span> lambda update-function-code \
+  --function-name myapp-api \
+  --image-uri $ECR_URI:sha-$(git rev-parse --short HEAD)</div>
+              </div>
+            </div>
+            <div class="ok-box">💡 <strong>Oracle Cloud gratis permanente:</strong> Si quieres más recursos sin límite de 12 meses, Oracle Cloud da 4 instancias ARM A1 (24GB RAM total) y 2 x86 micro de forma permanente. Puedes correr Kind + todo el stack ahí gratis para siempre.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.5 -->
+      <div class="howto-card" data-week="4">
+        <button class="howto-trigger" onclick="toggleHowto(this)">
+          <span class="howto-num">4.5</span>
+          <span class="howto-trigger-title">Logs con Loki + Structured Logging en la API</span>
+          <span class="howto-trigger-sub">Loki · Promtail · JSON logs · Correlación</span>
+          <span class="howto-arrow">▶</span>
+        </button>
+        <div class="howto-body" data-week="4">
+          <p class="howto-intro">Structured logging (JSON) permite que Loki indexe tus logs por campos, no solo por texto. La correlación con Prometheus se hace a través del Trace ID que aparece tanto en métricas como en logs.</p>
+          <div class="howto-steps">
+            <div class="step">
+              <div class="step-num" data-week="4">01</div>
+              <div class="step-content">
+                <div class="step-title">Structured logging con pino en Node.js</div>
+                <div class="step-desc">Pino es el logger más rápido para Node.js. Su salida es JSON línea-por-línea, perfecta para Loki y para cualquier plataforma de logs en cloud.</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">app/src/logger.ts</span><span class="file-lang">typescript</span></div>
+                  <div class="file-body">
+<span class="sk">import</span> pino from <span class="ss">'pino'</span>;
+
+<span class="sf">export const</span> logger = pino({
+  level: process.env.LOG_LEVEL || <span class="ss">'info'</span>,
+  formatters: {
+    level: (label) =&gt; ({ level: label }),
+  },
+  base: {
+    service: <span class="ss">'api'</span>,
+    version: process.env.APP_VERSION,
+  },
+});
+
+<span class="sm">// Uso en la API — genera JSON estructurado:</span>
+<span class="sm">// {"level":"info","service":"api","msg":"User created","userId":"123","duration":45}</span>
+logger.info({ userId: user.id, duration: ms }, <span class="ss">'User created'</span>);
+logger.error({ err: error, route: req.path }, <span class="ss">'Request failed'</span>);</div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" data-week="4">02</div>
+              <div class="step-content">
+                <div class="step-title">Configurar Promtail para enviar logs a Loki</div>
+                <div class="step-desc">Promtail es el agente que lee los logs de los contenedores Docker y los envía a Loki con labels automáticas (nombre del contenedor, imagen, etc.).</div>
+                <div class="file-block">
+                  <div class="file-header"><span class="file-name">infra/monitoring/promtail.yml</span><span class="file-lang">yaml</span></div>
+                  <div class="file-body">
+<span class="sk">server</span>:
+  <span class="sk">http_listen_port</span>: 9080
+
+<span class="sk">clients</span>:
+  - <span class="sk">url</span>: http://loki:3100/loki/api/v1/push
+
+<span class="sk">scrape_configs</span>:
+  - <span class="sk">job_name</span>: containers
+    <span class="sk">docker_sd_configs</span>:
+      - <span class="sk">host</span>: unix:///var/run/docker.sock
+        <span class="sk">refresh_interval</span>: 5s
+    <span class="sk">relabel_configs</span>:
+      - <span class="sk">source_labels</span>: [__meta_docker_container_name]
+        <span class="sk">target_label</span>: container
+      - <span class="sk">source_labels</span>: [__meta_docker_container_image]
+        <span class="sk">target_label</span>: image
+    <span class="sk">pipeline_stages</span>:
+      - <span class="sk">json</span>:        <span class="sm"># Parsea JSON logs automáticamente</span>
+          <span class="sk">expressions</span>:
+            <span class="sc">level</span>: level
+            <span class="sc">msg</span>: msg
+      - <span class="sk">labels</span>:
+          <span class="sc">level</span>:</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cost Strategy -->
+  <div class="section">
+    <div class="section-title">Estrategia de Costo $0</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;">
+        <div style="font-size:13px;font-family:'Space Mono',monospace;color:var(--accent);margin-bottom:8px;letter-spacing:1px">FASE LOCAL · $0.00/mes</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">✓</span> Kind + Docker local</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">✓</span> LocalStack para AWS</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">✓</span> Self-hosted GH Runner</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">✓</span> GHCR.io (500MB gratis)</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;">
+        <div style="font-size:13px;font-family:'Space Mono',monospace;color:var(--accent3);margin-bottom:8px;letter-spacing:1px">AWS FREE TIER · ~$0/mes</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent3)">✓</span> EC2 t3.micro (750h/mes)</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent3)">✓</span> Lambda 1M requests gratis</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent3)">✓</span> RDS db.t3.micro 20GB</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent3)">⚠️</span> Sin ALB → usar Func URLs</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;">
+        <div style="font-size:13px;font-family:'Space Mono',monospace;color:var(--accent4);margin-bottom:8px;letter-spacing:1px">ORACLE CLOUD · $0 PERMANENTE</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent4)">✓</span> 4x ARM A1 (24GB RAM!)</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent4)">✓</span> 2x AMD x86 micro</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent4)">✓</span> 200GB block storage</li>
+          <li style="font-size:13px;color:var(--muted);padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent4)">✓</span> Sin límite de tiempo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" data-week="4">
+    <div class="section-title">Reto Final — Semana 4 (Proyecto Completo)</div>
+    <div class="challenge-card" data-week="4">
+      <div class="challenge-label">🏆 Challenge Final · Semana 4</div>
+      <div class="challenge-title">MVP de Producción: Observable, Deployado y Documentado</div>
+      <div class="challenge-desc">El reto final integra todo el curso. Tu MVP debe estar completamente observable, con alertas configuradas, y un deploy funcional en al menos una plataforma cloud.</div>
+      <div class="deliverables">
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Dashboard Grafana con métricas RED (Rate, Errors, Duration) de la API</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Alerta en AlertManager: dispara si error rate &gt; 1% por 5 minutos</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>App desplegada en AWS Free Tier o Oracle Cloud con dominio funcional</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>Pipeline CI/CD completo: push → build → test → deploy automático</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>README con arquitectura, comandos de instalación y justificación de decisiones</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>BONUS: SLO definido (ej: 99.5% uptime) con error budget visualizado en Grafana</span></div>
+        <div class="deliverable"><div class="deliverable-check" onclick="toggleCheck(this)">✓</div><span>BONUS PRO: Loki para logs + correlación métricas-logs en Grafana Explore</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- PROGRESS -->
+<div class="progress-wrapper">
+  <button class="progress-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <div class="progress-track"><div class="progress-bar-inner" id="progress-bar" style="width:0%"></div></div>
+    <span id="progress-text">0 / 27</span>
+  </button>
+</div>
+
+<script>
+  function switchTab(n) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + n).classList.add('active');
+    document.querySelector(`.tab-btn[data-week="${n}"]`).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleHowto(btn) {
+    const card = btn.closest('.howto-card');
+    const isOpen = card.classList.contains('open');
+    // Close all in same grid
+    btn.closest('.howto-grid').querySelectorAll('.howto-card.open').forEach(c => c.classList.remove('open'));
+    if (!isOpen) card.classList.add('open');
+  }
+
+  let totalChecks = 0;
+  function countAll() {
+    totalChecks = document.querySelectorAll('.deliverable-check').length;
+    updateProgress();
+  }
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    updateProgress();
+  }
+  function updateProgress() {
+    const checked = document.querySelectorAll('.deliverable-check.checked').length;
+    const pct = totalChecks ? Math.round((checked / totalChecks) * 100) : 0;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `${checked} / ${totalChecks}`;
+  }
+  window.addEventListener('load', countAll);
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev # Usamos la versión dev para recarga en caliente
+    container_name: recipe_backend
+    ports:
+      - "3001:3001"
+    # El archivo .env se carga automáticamente si está en la misma carpeta que docker-compose.yml
+    # o puedes especificarlo explícitamente:
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - BACKEND_PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
+      - ./backend/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules # Evita que node_modules local sobrescriba al del contenedor
+    command: npm run dev
+    networks:
+      - recipe_network
+
+  # Frontend React (pendiente de inicializar proyecto real)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: recipe_frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - VITE_API_URL=http://localhost:3001/api
+    volumes:
+      - ./frontend/src:/app/src
+    command: npm run dev
+    networks:
+      - recipe_network
+
+networks:
+  recipe_network:
+    driver: bridge
