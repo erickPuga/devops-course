@@ -59,6 +59,7 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
+    environment: dev
     needs: validate  # ← Solo corre si validate pasó
     
     # Solo hacer push a docker hub en main, no en PRs
