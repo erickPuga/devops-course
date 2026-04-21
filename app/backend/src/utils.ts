@@ -4,6 +4,12 @@ import bcrypt from 'bcryptjs';
 import { config } from './config.js';
 import { User } from './types.js';
 
+// Validar email
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 // Generar tokens JWT
 export const generateTokens = (user: User) => {
   const accessToken = jwt.sign(
@@ -32,7 +38,7 @@ export const generateTokens = (user: User) => {
 export const verifyToken = (token: string) => {
   try {
     return jwt.verify(token, config.jwtSecret);
-  } catch (error) {
+  } catch {
     return null;
   }
 };

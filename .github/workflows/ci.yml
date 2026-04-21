@@ -1,0 +1,141 @@
+name: CI Robusto
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  # ==========================================
+  # JOB 1: VALIDAR CÓDIGO (Lint + Test)
+  # ==========================================
+  validate:
+    name: Validar Código
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Paso 1: Descargar el código del repo
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para algunos análisis
+      
+      # Paso 2: Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'  # Cachea node_modules para speedup
+      
+      # Paso 3: Instalar dependencias
+      - name: Instalar dependencias
+        run: |
+          cd app/backend
+          npm ci  # ci = "clean install" (más determinístico que npm install)
+      
+      # Paso 4: ESLint - Verificar código limpio
+      - name: Lint (ESLint)
+        run: |
+          cd app/backend
+          npm run lint
+      
+      # Paso 5: Jest - Ejecutar tests
+      - name: Tests (Jest)
+        run: |
+          cd app/backend
+          npm run test
+      
+      # Paso 6: Gitleaks - Detectar secrets
+      - name: Secret Detection (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  # ==========================================
+  # JOB 2: CONSTRUIR Y PUSHEAR IMAGEN
+  # ==========================================
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: validate  # ← Solo corre si validate pasó
+    
+    # Solo hacer push a docker hub en main, no en PRs
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      # Paso 1: Descargar código
+      - name: Checkout código
+        uses: actions/checkout@v4
+      
+      # Paso 2: Configurar acceso a Docker Hub
+      - name: Login a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      
+      # Paso 3: Setup Docker Buildx (para builds optimizados)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      # Paso 4: Obtener versión (SemVer tagging)
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(cat app/backend/package.json | grep '"version"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | xargs)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "image_tag=recipe-backend:v${VERSION}" >> $GITHUB_OUTPUT
+      
+      # Paso 5: Build Docker image
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/backend
+          dockerfile: ./Dockerfile
+          push: false  # No pushear aún, primero scanear
+          tags: ${{ steps.version.outputs.image_tag }}
+          outputs: type=docker,dest=/tmp/image.tar
+      
+      # Paso 6: Escanear vulnerabilidades (Trivy)
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: '/tmp/image.tar'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+      
+      # Paso 7: Upload reporte de Trivy
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      # Paso 8: Fallar si hay CRITICAL vulnerabilities
+      - name: Check Trivy results
+        run: |
+          if grep -q '"ruleId": "CRITICAL' trivy-results.sarif; then
+            echo "❌ CRITICAL vulnerabilities encontradas!"
+            exit 1
+          fi
+      
+      # Paso 9: Push image a Docker Hub
+      - name: Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/backend
+          dockerfile: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/recipe-backend:v${{ steps.version.outputs.version }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/recipe-backend:latest
+      
+      # Paso 10: Notificación de éxito
+      - name: Success notification
+        if: success()
+        run: |
+          echo "✅ CI Pipeline completado exitosamente!"
+          echo "📦 Imagen: ${{ secrets.DOCKER_HUB_USERNAME }}/recipe-backend:v${{ steps.version.outputs.version }}"

@@ -7,7 +7,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 BASE_URL="http://localhost:3001"
-EMAIL="test@example.com"
+EMAIL="test3@example.com"
 PASSWORD="password123"
 NEW_PASSWORD="newpassword456"
 

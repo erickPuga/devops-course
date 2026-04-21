@@ -1,6 +1,6 @@
 import { supabase } from '../db.js';
 import { hashPassword, comparePasswords } from '../utils.js';
-import { User, RegisterRequest, LoginRequest, UpdateProfileRequest, ChangePasswordRequest } from '../types.js';
+import { User, RegisterRequest, UpdateProfileRequest, ChangePasswordRequest } from '../types.js';
 
 class UserService {
   // Crear nuevo usuario

@@ -29,7 +29,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
     req.userId = payload.sub;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: 'Error al validar token' });
   }
 };
