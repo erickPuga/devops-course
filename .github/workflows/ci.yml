@@ -61,6 +61,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     needs: validate  # ← Solo corre si validate pasó
+
+    permissions:
+      contents: read      # Para leer el código
+      security-events: write # Para que Trivy/Gitleaks puedan subir resultados
+      packages: write
     
     # Solo hacer push a docker hub en main, no en PRs
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
