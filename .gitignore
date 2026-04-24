@@ -18,3 +18,8 @@ AWS/KEYS
 
 # macOS
 .DS_Store
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
