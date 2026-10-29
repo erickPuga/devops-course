@@ -60,6 +60,10 @@ jobs:
     environment: dev
     needs: validate  # ← Solo corre si validate pasó
 
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      image_name: ${{ secrets.DOCKER_HUB_USERNAME }}/recipe-backend
+
     permissions:
       contents: read      # Para leer el código
       security-events: write # Para que Trivy/Gitleaks puedan subir resultados
