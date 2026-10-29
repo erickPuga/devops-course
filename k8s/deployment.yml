@@ -17,7 +17,7 @@ spec:
       containers:
       - name: backend
         image: placeholder-image:latest # El pipeline reemplazará esta imagen automáticamente
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never # Evitamos que Kubernetes intente descargar la imagen, ya que la cargamos manualmente en Kind
         ports:
         - containerPort: 3001
         envFrom:
