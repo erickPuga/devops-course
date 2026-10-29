@@ -2,7 +2,7 @@ name: CI Robusto
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
