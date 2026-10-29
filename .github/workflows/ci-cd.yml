@@ -176,6 +176,20 @@ jobs:
           echo "Loading image into kind cluster..."
           kind load docker-image $IMAGE_TAG --name kind
 
+      - name: Create Kubernetes Secret from GitHub Secrets
+        run: |
+          echo "Creando o actualizando el secret de Supabase en el clúster..."
+          
+          # Borramos el secret si ya existe para asegurarnos de actualizarlo con los últimos valores
+          kubectl delete secret supabase-secret --ignore-not-found=true
+          
+          # Creamos el secret en caliente usando los secrets de GitHub Actions
+          kubectl create secret generic supabase-secret \
+            --from-literal=VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" \
+            --from-literal=VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            --from-literal=SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            --from-literal=JWT_SECRET="${{ secrets.JWT_SECRET }}"
+
       - name: Apply Kubernetes Manifests & Rollout
         run: |
           # Asegura que apunta al clúster correcto
