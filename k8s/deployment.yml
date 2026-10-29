@@ -22,7 +22,7 @@ spec:
         - containerPort: 3001
         envFrom:
         - secretRef:
-            name: supabase-secrets
+            name: supabase-secret
         env:
         - name: NODE_ENV
           value: "dev"
