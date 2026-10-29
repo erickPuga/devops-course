@@ -145,3 +145,44 @@ jobs:
         run: |
           echo "✅ CI Pipeline completado exitosamente!"
           echo "📦 Imagen: ${{ secrets.DOCKER_HUB_USERNAME }}/recipe-backend:v${{ steps.version.outputs.version }}"
+# ==========================================
+  # JOB 3: DEPLOY A KIND (Usando Self-Hosted Runner)
+  # ==========================================
+  deploy-to-kind:
+    name: Deploy to Local Kind Cluster
+    runs-on: self-hosted  # Corre en tu MacBook Pro
+    needs: build-and-push   # Espera a que la imagen esté segura en Docker Hub
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Pull Latest Image & Load into Kind
+        run: |
+          IMAGE_TAG="${{ needs.build-and-push.outputs.image_name }}:v${{ needs.build-and-push.outputs.version }}"
+          
+          echo "Pulling image: $IMAGE_TAG"
+          docker pull $IMAGE_TAG
+          
+          echo "Loading image into kind cluster..."
+          kind load docker-image $IMAGE_TAG --name kind
+
+      - name: Apply Kubernetes Manifests & Rollout
+        run: |
+          # Asegura que apunta al clúster correcto
+          kubectl cluster-info
+          
+          # Aplica tus manifiestos (Deployment y Service)
+          kubectl apply -f k8s/
+          
+          # Actualiza la imagen del deployment usando la versión exacta recién compilada
+          kubectl set image deployment/recipe-backend-deployment backend=${{ needs.build-and-push.outputs.image_name }}:v${{ needs.build-and-push.outputs.version }}
+          
+          # Espera a que el rollout sea exitoso
+          kubectl rollout status deployment/recipe-backend-deployment

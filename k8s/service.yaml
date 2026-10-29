@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: recipe-backend-service
+  labels:
+    app: recipe-backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80         # Puerto interno del Service en el clúster
+    targetPort: 3001   # Puerto donde escucha Node.js dentro de tu contenedor
+    protocol: TCP
+    name: http
+  selector:
+    app: recipe-backend
