@@ -203,3 +203,59 @@ jobs:
           
           # Espera a que el rollout sea exitoso
           kubectl rollout status deployment/recipe-backend-deployment
+
+      - name: Run E2E Integration Tests with Port-Forward
+        run: |
+          # 1. Iniciar port-forward en segundo plano hacia el puerto 3001
+          echo "Iniciando port-forward a service/recipe-backend-service (3001:80)..."
+          kubectl port-forward service/recipe-backend-service 3001:80 > /tmp/port-forward.log 2>&1 &
+          PF_PID=$!
+
+          # 2. Asegurar que al finalizar el step (con éxito o error) se mate el proceso port-forward
+          cleanup() {
+            echo "Deteniendo port-forward (PID: $PF_PID)..."
+            kill $PF_PID 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          # 3. Esperar a que el puerto 3001 esté listo para responder (hasta 30 segundos)
+          echo "Esperando que el backend responda en http://localhost:3001/health..."
+          for i in {1..30}; do
+            if curl -s -o /dev/null http://localhost:3001/health; then
+              echo "✅ Backend respondiendo correctamente!"
+              break
+            fi
+            sleep 1
+          done
+
+          # 4. Dar permisos de ejecución y correr el script de pruebas
+          chmod +x app/backend/test.sh
+          ./app/backend/test.sh
+
+      - name: Run E2E Integration Tests with Port-Forward
+        run: |
+          # 1. Iniciar port-forward en segundo plano hacia el puerto 3001
+          echo "Iniciando port-forward a deployment/recipe-backend-service (3001:3001)..."
+          kubectl port-forward deployment/recipe-backend-service 3001:3001 > /tmp/port-forward.log 2>&1 &
+          PF_PID=$!
+
+          # 2. Asegurar que al finalizar el step (con éxito o error) se mate el proceso port-forward
+          cleanup() {
+            echo "Deteniendo port-forward (PID: $PF_PID)..."
+            kill $PF_PID 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          # 3. Esperar a que el puerto 3001 esté listo para responder (hasta 30 segundos)
+          echo "Esperando que el backend responda en http://localhost:3001/health..."
+          for i in {1..30}; do
+            if curl -s -o /dev/null http://localhost:3001/health; then
+              echo "✅ Backend respondiendo correctamente!"
+              break
+            fi
+            sleep 1
+          done
+
+          # 4. Dar permisos de ejecución y correr el script de pruebas
+          chmod +x app/backend/test.sh
+          ./app/backend/test.sh
