@@ -149,15 +149,18 @@ jobs:
   deploy-to-kind:
     name: Deploy to Local Kind Cluster
     runs-on: self-hosted  # Corre en tu MacBook Pro
+    environment: dev
     needs: build-and-push   # Espera a que la imagen esté segura en Docker Hub
     
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Login a Docker Hub nativo en Mac
-        run: |
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+      - name: Login a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Pull Latest Image & Load into Kind
         run: |
