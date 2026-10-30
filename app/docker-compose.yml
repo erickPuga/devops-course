@@ -26,11 +26,11 @@ services:
     networks:
       - recipe_network
 
-  # Frontend React (pendiente de inicializar proyecto real)
+  # Frontend React + Vite
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: recipe_frontend
     ports:
       - "3000:3000"
@@ -40,7 +40,9 @@ services:
       - VITE_API_URL=http://localhost:3001/api
     volumes:
       - ./frontend/src:/app/src
-    command: npm run dev
+      - /app/node_modules
+    depends_on:
+      - backend
     networks:
       - recipe_network
 

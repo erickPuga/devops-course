@@ -8,7 +8,12 @@
    - Stack tecnológico
    - **Tiempo de lectura: 5 minutos**
 
-### 2. **BACKEND_SETUP.md**
+### 2. **FRONTEND_RESUMEN.md** 🎨 FRONTEND IMPLEMENTADO
+   - Arquitectura React 18 + Vite + Tailwind CSS
+   - Vistas, componentes, servicios y dockerización
+   - **Tiempo de lectura: 4 minutos**
+
+### 3. **BACKEND_SETUP.md**
    - Instrucciones paso a paso
    - Cómo correr el servidor
    - Variables de entorno
