@@ -7,11 +7,41 @@ on:
 
 jobs:
   # ==========================================
+  # JOB 0: DETECTAR CAMBIOS EN RUTAS
+  # ==========================================
+  changes:
+    name: Detectar Rutas Modificadas
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      k8s: ${{ steps.filter.outputs.k8s }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Filtrar rutas modificadas
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'app/backend/**'
+              - 'backend/**'
+            k8s:
+              - 'k8s/**'
+            workflows:
+              - '.github/workflows/**'
+
+  # ==========================================
   # JOB 1: VALIDAR CÓDIGO (Lint + Test)
   # ==========================================
   validate:
     name: Validar Código
     runs-on: ubuntu-latest
+    needs: changes
+    # Solo se ejecuta si hay cambios en el backend o si fue disparado manualmente
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     
     steps:
       # Paso 1: Descargar el código del repo
@@ -58,19 +88,20 @@ jobs:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     environment: dev
-    needs: validate  # ← Solo corre si validate pasó
+    needs: [changes, validate]
+    # Solo corre si validate pasó exitosamente y hubo cambios en el backend (o manual)
+    if: |
+      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+      (needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch')
 
     outputs:
       version: ${{ steps.version.outputs.version }}
       image_name: ${{ vars.DOCKER_HUB_USERNAME }}/recipe-backend
 
     permissions:
-      contents: read      # Para leer el código
+      contents: read         # Para leer el código
       security-events: write # Para que Trivy/Gitleaks puedan subir resultados
       packages: write
-    
-    # Solo hacer push a docker hub en main, no en PRs
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     
     steps:
       # Paso 1: Descargar código
@@ -102,7 +133,7 @@ jobs:
         with:
           context: ./app/backend
           dockerfile: ./Dockerfile
-          push: false  # No pushear aún, primero scanear
+          push: false  # No pushear aún, primero escanear
           tags: ${{ steps.version.outputs.image_tag }}
           outputs: type=docker,dest=/tmp/image.tar
       
@@ -147,14 +178,32 @@ jobs:
         run: |
           echo "✅ CI Pipeline completado exitosamente!"
           echo "📦 Imagen: ${{ vars.DOCKER_HUB_USERNAME }}/recipe-backend:v${{ steps.version.outputs.version }}"
-# ==========================================
+
+  # ==========================================
   # JOB 3: DEPLOY A KIND (Usando Self-Hosted Runner)
   # ==========================================
   deploy-to-kind:
     name: Deploy to Local Kind Cluster
-    runs-on: self-hosted  # Corre en tu MacBook Pro
+    runs-on: self-hosted  # Corre en el runner local
     environment: dev
-    needs: build-and-push   # Espera a que la imagen esté segura en Docker Hub
+    needs: [changes, validate, build-and-push]
+    # Se ejecuta si:
+    # 1. No hubo fallos ni cancelaciones en jobs previos.
+    # 2. Y además se cumple al menos una de estas condiciones:
+    #    a) build-and-push fue exitoso (hubo cambio en backend).
+    #    b) Hubo cambios en manifiestos de k8s/**.
+    #    c) Hubo cambios en workflows (.github/workflows/**).
+    #    d) Fue disparado manualmente (workflow_dispatch).
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      (
+        needs.build-and-push.result == 'success' ||
+        needs.changes.outputs.k8s == 'true' ||
+        needs.changes.outputs.workflows == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      )
     
     steps:
       - name: Checkout código
@@ -166,9 +215,27 @@ jobs:
           username: ${{ vars.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      # Paso para determinar la versión de la imagen a desplegar:
+      # Si build-and-push corrió, usa su output. Si fue omitido (solo cambio en k8s/workflows),
+      # toma la versión del package.json actual del backend.
+      - name: Determinar imagen a desplegar
+        id: image-info
+        run: |
+          if [ -n "${{ needs.build-and-push.outputs.version }}" ]; then
+            VERSION="${{ needs.build-and-push.outputs.version }}"
+          else
+            VERSION=$(cat app/backend/package.json | grep '"version"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | xargs)
+          fi
+          IMAGE_NAME="${{ vars.DOCKER_HUB_USERNAME }}/recipe-backend"
+          IMAGE_TAG="${IMAGE_NAME}:v${VERSION}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "📦 Imagen a desplegar: $IMAGE_TAG"
+
       - name: Pull Latest Image & Load into Kind
         run: |
-          IMAGE_TAG="${{ needs.build-and-push.outputs.image_name }}:v${{ needs.build-and-push.outputs.version }}"
+          IMAGE_TAG="${{ steps.image-info.outputs.image_tag }}"
           
           echo "Pulling image: $IMAGE_TAG"
           docker pull $IMAGE_TAG
@@ -195,11 +262,11 @@ jobs:
           # Asegura que apunta al clúster correcto
           kubectl cluster-info
           
-          # Aplica tus manifiestos (Deployment y Service)
+          # Aplica los manifiestos (Deployment y Service)
           kubectl apply -f k8s/
           
-          # Actualiza la imagen del deployment usando la versión exacta recién compilada
-          kubectl set image deployment/recipe-backend-deployment backend=${{ needs.build-and-push.outputs.image_name }}:v${{ needs.build-and-push.outputs.version }}
+          # Actualiza la imagen del deployment usando la versión exacta determinada
+          kubectl set image deployment/recipe-backend-deployment backend=${{ steps.image-info.outputs.image_tag }}
           
           # Espera a que el rollout sea exitoso
           kubectl rollout status deployment/recipe-backend-deployment
@@ -231,4 +298,3 @@ jobs:
           # 4. Dar permisos de ejecución y correr el script de pruebas
           chmod +x app/backend/test.sh
           ./app/backend/test.sh
-          
