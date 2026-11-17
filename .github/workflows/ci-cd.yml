@@ -245,7 +245,7 @@ jobs:
           docker pull $IMAGE_TAG
           
           echo "Loading image into kind cluster..."
-          kind load docker-image $IMAGE_TAG --name kind
+          kind load docker-image $IMAGE_TAG --name kind-erick-dev-k8s
 
       - name: Create Kubernetes Secret from GitHub Secrets
         run: |
