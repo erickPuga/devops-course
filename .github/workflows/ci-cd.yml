@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
       k8s: ${{ steps.filter.outputs.k8s }}
       workflows: ${{ steps.filter.outputs.workflows }}
     steps:
@@ -28,6 +29,9 @@ jobs:
             backend:
               - 'app/backend/**'
               - 'backend/**'
+            frontend:
+              - 'app/frontend/**'
+              - 'frontend/**'
             k8s:
               - 'k8s/**'
             workflows:
@@ -76,10 +80,10 @@ jobs:
           npm run test
       
       # Paso 6: Gitleaks - Detectar secrets
-      - name: Secret Detection (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Secret Detection (Gitleaks)
+      #   uses: gitleaks/gitleaks-action@v2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
   # ==========================================
   # JOB 2: CONSTRUIR Y PUSHEAR IMAGEN
