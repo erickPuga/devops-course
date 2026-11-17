@@ -66,8 +66,8 @@ Iniciar sesión y obtener tokens.
 **Response:** `200 OK`
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+  "accessToken": "yourKeyBrouOiJIUzI1NiIs...",
+  "refreshToken": "yourKeyBrouOiJIUzI1NiIs...",
   "expiresIn": 900,
   "user": {
     "id": "uuid",
@@ -110,14 +110,14 @@ Obtener nuevo access token.
 **Request Body:**
 ```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+  "refreshToken": "yourKeyBrouOiJIUzI1NiIs..."
 }
 ```
 
 **Response:** `200 OK`
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "accessToken": "yourKeyBrouOiJIUzI1NiIs...",
   "expiresIn": 900
 }
 ```

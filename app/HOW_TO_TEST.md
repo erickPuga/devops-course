@@ -63,8 +63,8 @@ curl -X POST http://localhost:3001/api/auth/register \
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
   },
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+  "accessToken": "yourKeyBrouOiJIUzI1NiIs...",
+  "refreshToken": "yourKeyBrouOiJIUzI1NiIs..."
 }
 ```
 

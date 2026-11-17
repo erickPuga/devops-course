@@ -249,7 +249,7 @@ test('createUser rejects invalid email', () => {
 **¿Cómo falla?**
 ```bash
 # ❌ Esto fallaría en Gitleaks
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const supabaseKey = "yourKeyBrouOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 
 # ✅ Esto pasa (usa variable de entorno)
 const supabaseKey = process.env.SUPABASE_KEY;
